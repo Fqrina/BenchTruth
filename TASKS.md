@@ -78,11 +78,12 @@ it. **Do not start a task whose dependencies are open.**
 ## Tier 2 — the model + the renderers (Oct 29–30)
 
 - **T-30** `llm/providers.py` — one `chat()` signature, `meta` + `mock` backends.
-  - **Status:** planned · **AC:** mock returns fixtures; no network in the tests.
+  - **Status:** done · **AC:** mock returns fixtures; no network in the tests. ✓
 - **T-31** `llm/spec_gen.py` — prompt → schema-validated spec, ≤3 retries with the
   validation error fed back.
-  - **Status:** planned · **AC:** a malformed model response is retried, then falls back
-    to the local parser.
+  - **Status:** done · **AC:** a malformed model response is retried, then falls back
+    to the local parser. ✓ The parser reads whole-word matches only, takes the count
+    from the text, and never invents a part.
 - **T-32** `render/wiring_table.py`, `render/bom.py`, `render/prices.py`.
   - **Status:** planned · **AC:** the BOM shows the part id, the human name, the qty,
     the price band + date, and the source link.

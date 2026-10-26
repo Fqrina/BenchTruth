@@ -49,8 +49,43 @@ that `SPEC.md` §8 promises — the I²C resolution was previously computed and 
 away. The signal-profiles schema immediately caught a level shifter declaring an
 empty signal list, which is correct for a passive part; the schema now says so.
 
+### Later the same day — the spec layer
+
+**`llm/providers.py`** — one `chat()` signature with two backends. `MetaProvider`
+talks to the Meta Model API (`muse-spark-1.3`); `MockProvider` never touches the
+network, so CI, judges and the offline demo all run the same code path with no key.
+
+**`llm/spec_gen.py`** — a prompt becomes a schema-validated spec. The model's reply is
+validated against `spec/project_spec.schema.json`; a malformed or invalid reply is
+retried with the error fed back, up to three times, and then the **local fallback
+parser** takes over. That parser maps the words in the prompt onto parts that are
+actually in the database — whole-word matches only, one part per keyword, counts read
+from the text ("two oled displays" → count 2) — and it never invents a part.
+
+**Three real bugs this surfaced, all fixed:**
+
+- `_rule_i2c` ignored `count`, so "two OLEDs" was one device on the bus and the
+  address collision went unnoticed. It now expands the count, and R8 fires.
+- The keyword matcher was substring-based, so "led" matched inside "oled" and the
+  generic word "probe" pulled in the wrong part. Matching is now whole-word, the
+  database order breaks ties, and the ambiguous keyword is gone.
+- `Plan.refusal_card()` crashed on a Windows console — U+274C cannot be encoded by
+  the default code page. The card now falls back to ASCII markers when the terminal
+  cannot encode them.
+
+**The flagship prompt now runs end to end, offline:**
+
+```
+prompt  → 2× OLED + soil probe on GPIO 25 + servo + buzzer, WiFi, board-only
+       → spec: 4 peripherals, the probe's requested pin recorded, WiFi + board-only
+       → verdict OFFER · R5 (ADC2 dies with WiFi) · R8 (two devices at 0x3C)
+                R12 (servo off the logic rail) · R11 (580 mA against a 300 mA rail)
+```
+
+29 unit tests, 20/20 on the solver eval, and the data contracts clean.
+
 **Next:** the parts database gets real sources and caliper measurements, the engine
-gets rewritten into modules, and the model goes in the loop.
+gets rewritten into modules, and the renderers go in.
 
 ---
 

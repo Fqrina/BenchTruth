@@ -265,8 +265,8 @@
     ],
     "keywords": [
       "ds18b20",
-      "probe",
       "onewire",
+      "one-wire",
       "waterproof"
     ]
   },

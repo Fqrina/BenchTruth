@@ -18,6 +18,7 @@ Verdict derivation is normative -- see SPEC.md section 7.
 from __future__ import annotations
 
 import math
+import sys
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
@@ -41,6 +42,25 @@ SIGNAL_EXPANSION = {
 
 def _worse(a: str, b: str) -> str:
     return a if VERDICT_ORDER.index(a) <= VERDICT_ORDER.index(b) else b
+
+
+def _console_safe(text: str, plain: bool = False) -> str:
+    """Keep the emoji when the terminal can encode them, fall back to ASCII if not.
+
+    A Windows console with the default code page cannot encode U+274C, and the
+    refusal card is exactly the thing you do not want to crash on.
+    """
+    ascii_form = (text.replace("❌", "[X] ").replace("✅", "[OK] ")
+                      .replace("—", "--").replace("–", "-")
+                      .replace("·", "-").replace("µ", "u"))
+    if plain:
+        return ascii_form
+    encoding = getattr(sys.stdout, "encoding", None) or "ascii"
+    try:
+        text.encode(encoding)
+    except (UnicodeEncodeError, LookupError):
+        return ascii_form
+    return text
 
 
 @dataclass
@@ -98,9 +118,14 @@ class Plan:
     def fired_rules(self) -> list:
         return [v.rule_id for v in self.violations]
 
-    def refusal_card(self) -> str:
+    def refusal_card(self, plain: bool = False) -> str:
+        """The refusal card, as text.
+
+        The emoji are the point in a browser, but a Windows console often cannot
+        encode them, so the text falls back to ASCII markers when it has to.
+        """
         if self.verdict == "BUILD":
-            return "✅ BUILD OK — every constraint satisfied."
+            return _console_safe("✅ BUILD OK — every constraint satisfied.", plain)
         blocks = [f"❌ CANNOT BUILD AS SPECIFIED\n{self.board_id} · {len(self.signals)} signals"]
         for v in self.violations:
             if v.verdict in ("WARN",) and self.verdict in ("REFUSE", "OFFER"):
@@ -112,7 +137,7 @@ class Plan:
                 blocks.append(f"  {fx.render()}")
         if self.verdict in ("REFUSE", "OFFER"):
             blocks.append("Pick one and I will rebuild, recompile and re-simulate.")
-        return "\n".join(blocks)
+        return _console_safe("\n".join(blocks), plain)
 
 
 class Solver:
@@ -423,7 +448,10 @@ class Solver:
             rec = self.db.part(p.get("part_id", ""))
             if not rec or rec.get("iface", {}).get("type") != "i2c":
                 continue
-            devices.append((p, rec))
+            # A part with a count of 2 is two devices on the bus, not one -- and
+            # two identical devices land on the same address.
+            for _ in range(int(p.get("count", 1))):
+                devices.append((p, rec))
         if not devices:
             if plan is not None:
                 plan.i2c = {"bus": "i2c0", "sda": None, "scl": None, "devices": []}

@@ -94,7 +94,7 @@ with `python eval/run_eval.py`; it rewrites `eval/RESULTS.md`.
 | **Solver** | The deterministic engine. Pin allocation, I²C resolution, rail budgets, mechanical fit. 17 rules, each with a severity, an autofix policy, the physics, and costed options. | **working** |
 | **Parts database** | 18 parts with dated price bands, electrical limits, dimensions, and a real source link for every entry. | **working** |
 | **Verification corpus** | 20 conflict cases, hand-written golden specs, a deterministic harness. No LLM in the loop. | **working** |
-| **Spec layer** | Muse Spark 1.3 turns a prompt into a schema-validated intent document. It never names a pin, writes code, or draws geometry. | building |
+| **Spec layer** | A prompt becomes a schema-validated intent document. It never names a pin, writes code, or draws geometry. Retries with the validation error fed back, then falls back to a local parser so it works with no key. | **working** |
 | **Renderers** | BOM with dated price bands, wiring table, Arduino sketch, Wokwi `diagram.json`. | building |
 | **Compile gate** | `arduino-cli` compiles the generated sketch. A plan is only approved if the code builds. | building |
 | **Simulation** | the approved build, running in a browser. | building |
