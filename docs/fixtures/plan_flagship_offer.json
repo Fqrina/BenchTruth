@@ -1,0 +1,425 @@
+{
+  "db_version": "0.3",
+  "board": "esp32-devkitc-v4",
+  "verdict": "OFFER",
+  "signals": [
+    {
+      "part_id": "ssd1306-096",
+      "kind": "i2c_sda",
+      "direction": "bidirectional",
+      "gpio": 21,
+      "reason": "shared I2C bus pin",
+      "requested": false,
+      "bus": "i2c"
+    },
+    {
+      "part_id": "ssd1306-096",
+      "kind": "i2c_sda",
+      "direction": "bidirectional",
+      "gpio": 21,
+      "reason": "shared I2C bus pin",
+      "requested": false,
+      "bus": "i2c"
+    },
+    {
+      "part_id": "ssd1306-096",
+      "kind": "i2c_scl",
+      "direction": "bidirectional",
+      "gpio": 22,
+      "reason": "shared I2C bus pin",
+      "requested": false,
+      "bus": "i2c"
+    },
+    {
+      "part_id": "ssd1306-096",
+      "kind": "i2c_scl",
+      "direction": "bidirectional",
+      "gpio": 22,
+      "reason": "shared I2C bus pin",
+      "requested": false,
+      "bus": "i2c"
+    },
+    {
+      "part_id": "sg90",
+      "kind": "pwm_out",
+      "direction": "out",
+      "gpio": 33,
+      "reason": "PWM/LEDC capable, ADC1",
+      "requested": false,
+      "bus": null
+    },
+    {
+      "part_id": "soil-capacitive",
+      "kind": "analog_in",
+      "direction": "in",
+      "gpio": 35,
+      "reason": "reassigned after rule check",
+      "requested": true,
+      "bus": null
+    },
+    {
+      "part_id": "piezo-buzzer",
+      "kind": "digital_out",
+      "direction": "out",
+      "gpio": 32,
+      "reason": "PWM/LEDC capable, ADC1",
+      "requested": false,
+      "bus": null
+    }
+  ],
+  "i2c": {
+    "bus": "i2c0",
+    "sda": 21,
+    "scl": 22,
+    "devices": [
+      {
+        "part_id": "ssd1306-096",
+        "name": "0.96in SSD1306 OLED, I2C, 128x64",
+        "address": "0x3C"
+      },
+      {
+        "part_id": "ssd1306-096",
+        "name": "0.96in SSD1306 OLED, I2C, 128x64",
+        "address": "0x3C"
+      }
+    ]
+  },
+  "power": {
+    "rails": [
+      {
+        "name": "3v3",
+        "peak_ma": 580.0,
+        "capacity_ma": 300,
+        "reserve_ma": 240
+      },
+      {
+        "name": "5v",
+        "peak_ma": 0,
+        "capacity_ma": 500
+      },
+      {
+        "name": "external",
+        "peak_ma": 250.0,
+        "capacity_ma": null
+      }
+    ],
+    "breakdown": [
+      {
+        "part": "0.96in SSD1306 OLED, I2C, 128x64",
+        "rail": "3v3",
+        "peak_ma": 40.0
+      },
+      {
+        "part": "SG90 micro servo",
+        "rail": "external",
+        "peak_ma": 250.0
+      },
+      {
+        "part": "Capacitive soil moisture (analog)",
+        "rail": "3v3",
+        "peak_ma": 20.0
+      },
+      {
+        "part": "Piezo buzzer, active",
+        "rail": "3v3",
+        "peak_ma": 30.0
+      }
+    ]
+  },
+  "mech": {
+    "mount_style": "free",
+    "grid_pitch_mm": 10.0,
+    "envelope": null,
+    "cells": [
+      {
+        "name": "board:esp32-devkitc-v4",
+        "w_mm": 52.4,
+        "d_mm": 27.9,
+        "cell_w_mm": 60.0,
+        "cell_d_mm": 40.0
+      },
+      {
+        "name": "0.96in SSD1306 OLED, I2C, 128x64",
+        "w_mm": 27.3,
+        "d_mm": 27.8,
+        "cell_w_mm": 40.0,
+        "cell_d_mm": 40.0
+      },
+      {
+        "name": "SG90 micro servo",
+        "w_mm": 40.7,
+        "d_mm": 12.2,
+        "cell_w_mm": 50.0,
+        "cell_d_mm": 20.0
+      },
+      {
+        "name": "Capacitive soil moisture (analog)",
+        "w_mm": 60.0,
+        "d_mm": 25.0,
+        "cell_w_mm": 70.0,
+        "cell_d_mm": 30.0
+      },
+      {
+        "name": "Piezo buzzer, active",
+        "w_mm": 12.0,
+        "d_mm": 12.0,
+        "cell_w_mm": 20.0,
+        "cell_d_mm": 20.0
+      }
+    ],
+    "total_area_mm2": 7500.0,
+    "capacity_mm2": null
+  },
+  "violations": [
+    {
+      "rule_id": "R5",
+      "severity": "FATAL",
+      "autofix": "AUTO",
+      "headline": "GPIO 25 is an ADC2 channel and WiFi is enabled",
+      "why": "ADC2 channels stop working while the radio is active, so the reading would be silently wrong.",
+      "applied": true,
+      "verdict": "FIXED",
+      "affected": [
+        {
+          "kind": "signal",
+          "part_id": "soil-capacitive",
+          "signal": "analog_in",
+          "gpio": 25,
+          "moved_to": 35
+        }
+      ],
+      "fixes": []
+    },
+    {
+      "rule_id": "R8",
+      "severity": "FATAL",
+      "autofix": "OFFER",
+      "headline": "0.96in SSD1306 OLED, I2C, 128x64 and 0.96in SSD1306 OLED, I2C, 128x64 both want I2C address 0x3C",
+      "why": "A bus carries one device per address. Two devices with the same address answer at the same time and the bus locks up.",
+      "applied": false,
+      "verdict": "OFFER",
+      "affected": [
+        {
+          "kind": "bus",
+          "name": "i2c0"
+        },
+        {
+          "kind": "i2c",
+          "address": "0x3C",
+          "part_id": "ssd1306-096"
+        },
+        {
+          "kind": "i2c",
+          "address": "0x3C",
+          "part_id": "ssd1306-096"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "A",
+          "label": "Re-address 0.96in SSD1306 OLED, I2C, 128x64 to 0x3D (strap or solder jumper)",
+          "cost_idr": [
+            12000,
+            35000
+          ],
+          "effort": "one soldered pad",
+          "part_id": null
+        },
+        {
+          "id": "B",
+          "label": "Add a TCA9548A I2C multiplexer",
+          "cost_idr": [
+            12000,
+            30000
+          ],
+          "effort": "4 extra solder points",
+          "part_id": null
+        },
+        {
+          "id": "C",
+          "label": "Drop 0.96in SSD1306 OLED, I2C, 128x64",
+          "cost_idr": null,
+          "effort": "free",
+          "part_id": null
+        }
+      ]
+    },
+    {
+      "rule_id": "R12",
+      "severity": "FATAL",
+      "autofix": "OFFER",
+      "headline": "250 mA of loads must run off the board itself",
+      "why": "Servos, motors and LED strips draw stall current far beyond the 3V3 regulator. The board will brown out and reset.",
+      "applied": false,
+      "verdict": "OFFER",
+      "affected": [
+        {
+          "kind": "part",
+          "part_id": "sg90"
+        },
+        {
+          "kind": "rail",
+          "name": "3v3"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "A",
+          "label": "Add a separate 5 V supply with a common ground",
+          "cost_idr": [
+            40000,
+            120000
+          ],
+          "effort": "2 extra wires",
+          "part_id": null
+        },
+        {
+          "id": "B",
+          "label": "Use a PCA9685 driver on its own supply",
+          "cost_idr": [
+            18000,
+            45000
+          ],
+          "effort": "+3 solder points",
+          "part_id": null
+        },
+        {
+          "id": "C",
+          "label": "Allow an external supply",
+          "cost_idr": null,
+          "effort": "free",
+          "part_id": null
+        }
+      ]
+    },
+    {
+      "rule_id": "R11",
+      "severity": "FATAL",
+      "autofix": "OFFER",
+      "headline": "3V3 rail needs 580 mA but the board is rated 300 mA",
+      "why": "Breakdown on the 3V3 rail: 0.96in SSD1306 OLED, I2C, 128x64 40 mA, SG90 micro servo 250 mA, Capacitive soil moisture (analog) 20 mA, Piezo buzzer, active 30 mA, WiFi TX reserve 240 mA. Over budget by 280 mA.",
+      "applied": false,
+      "verdict": "OFFER",
+      "affected": [
+        {
+          "kind": "rail",
+          "name": "3v3"
+        },
+        {
+          "kind": "part",
+          "part_id": "ssd1306-096"
+        },
+        {
+          "kind": "part",
+          "part_id": "soil-capacitive"
+        },
+        {
+          "kind": "part",
+          "part_id": "piezo-buzzer"
+        },
+        {
+          "kind": "part",
+          "part_id": "sg90"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "A",
+          "label": "Move the load to VIN (5 V) with a common ground",
+          "cost_idr": null,
+          "effort": "2 extra wires",
+          "part_id": null
+        },
+        {
+          "id": "B",
+          "label": "Add an external supply",
+          "cost_idr": [
+            40000,
+            120000
+          ],
+          "effort": "1 supply",
+          "part_id": null
+        },
+        {
+          "id": "C",
+          "label": "Drop the heaviest peripheral",
+          "cost_idr": null,
+          "effort": "edit the request",
+          "part_id": null
+        }
+      ]
+    }
+  ],
+  "artifacts": {},
+  "notes": [
+    "Rule ids: R11, R12, R5, R8"
+  ],
+  "_source": {
+    "prompt": "ESP32 desk plant monitor: two oled displays, a soil moisture probe on gpio 25, a servo vent and a buzzer. Wifi, and it has to run off the board.",
+    "spec": {
+      "board": "esp32-devkitc-v4",
+      "goal": "ESP32 desk plant monitor: two oled displays, a soil moisture probe on gpio 25, a servo vent and a buzzer. Wifi, and it has to run off the board.",
+      "peripherals": [
+        {
+          "part_id": "ssd1306-096",
+          "role": "oled",
+          "count": 2,
+          "signals_needed": [
+            {
+              "signal": "i2c",
+              "direction": "bidirectional"
+            }
+          ]
+        },
+        {
+          "part_id": "sg90",
+          "role": "servo",
+          "signals_needed": [
+            {
+              "signal": "pwm_out",
+              "direction": "out"
+            }
+          ]
+        },
+        {
+          "part_id": "soil-capacitive",
+          "role": "moisture",
+          "signals_needed": [
+            {
+              "signal": "analog_in",
+              "direction": "in"
+            }
+          ]
+        },
+        {
+          "part_id": "piezo-buzzer",
+          "role": "buzzer",
+          "signals_needed": [
+            {
+              "signal": "digital_out",
+              "direction": "out"
+            }
+          ]
+        }
+      ],
+      "constraints": {
+        "connectivity": [
+          "wifi"
+        ],
+        "power": {
+          "external_supply_allowed": false
+        },
+        "mechanical": {
+          "mount_style": "free"
+        }
+      },
+      "requested_pins": [
+        {
+          "part_id": "soil-capacitive",
+          "signal": "analog_in",
+          "gpio": 25
+        }
+      ]
+    }
+  }
+}

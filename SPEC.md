@@ -180,6 +180,36 @@ Implemented in `benchtruth/solver.py` → `Solver._verdict`, and enforced by
 Every `violation.fixes` entry must carry a cost band from the parts DB when it implies a
 part, and a human `effort` string. The refusal card renders these as A/B/C choices.
 
+### 8.1 `violations[].affected` — what the violation is about
+
+A renderer must be able to draw a violation **on the wire it belongs to**, so every
+violation carries machine-readable references to what it is about. This is the
+contract the UI in `docs/PLAN_UI.md` is built against.
+
+```jsonc
+"affected": [
+  { "kind": "signal", "part_id": "soil-capacitive", "signal": "analog_in",
+    "gpio": 25, "moved_to": 35 },          // the pin asked for, and where it went
+  { "kind": "part",   "part_id": "sg90", "name": "SG90 micro servo" },
+  { "kind": "rail",   "name": "3v3" },
+  { "kind": "bus",    "name": "i2c0" },
+  { "kind": "i2c",    "address": "0x3C", "part_id": "ssd1306-096" },
+  { "kind": "envelope", "width_mm": 120, "depth_mm": 80 }
+]
+```
+
+| `kind` | Meaning | `moved_to` |
+|---|---|---|
+| `signal` | one wire: a board pin to a part | present when an AUTO fix moved the pin — `gpio` is the rejected one |
+| `part` | every wire of a part | — |
+| `rail` | a rail and every power wire on it | — |
+| `bus` | a shared bus trunk (the I²C bus) | — |
+| `i2c` | one device on a bus, with its address | — |
+| `envelope` | the mechanical area | — |
+
+`Plan.to_dict()` returns the plan above as plain JSON. It must serialise without a
+custom encoder, and `tests/test_plan_contract.py` enforces both properties.
+
 ## 9. The refusal card format
 
 ```

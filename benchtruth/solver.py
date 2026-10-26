@@ -89,6 +89,23 @@ class Violation:
     fixes: list = field(default_factory=list)
     applied: bool = False
     verdict: str = "WARN"
+    # What this violation is about, in machine-readable form. The renderers use
+    # it to draw the violation on the wire it belongs to. See SPEC.md section 8.
+    #
+    #   {"kind": "signal", "part_id": str, "signal": str, "gpio": int,
+    #    "moved_to": int?}     a board pin, and where the solver put it instead
+    #   {"kind": "part",   "part_id": str, "name": str?}      every wire of a part
+    #   {"kind": "rail",   "name": "3v3"|"5v"|"external"}    every wire on a rail
+    #   {"kind": "bus",    "name": "i2c0"}                   a shared bus trunk
+    #   {"kind": "i2c",    "address": str, "part_id": str}  one device on a bus
+    #   {"kind": "envelope"}                                the mechanical area
+    affected: list = field(default_factory=list)
+
+
+def _ref(kind: str, **kw) -> dict:
+    out = {"kind": kind}
+    out.update(kw)
+    return out
 
 
 @dataclass
@@ -117,6 +134,31 @@ class Plan:
 
     def fired_rules(self) -> list:
         return [v.rule_id for v in self.violations]
+
+    def to_dict(self) -> dict:
+        """The plan as plain JSON, exactly as SPEC.md section 8 describes it."""
+        return {
+            "db_version": self.db_version,
+            "board": self.board_id,
+            "verdict": self.verdict,
+            "signals": [{"part_id": s.part_id, "kind": s.kind, "direction": s.direction,
+                         "gpio": s.gpio, "reason": s.reason, "requested": s.requested,
+                         "bus": s.bus} for s in self.signals],
+            "i2c": self.i2c,
+            "power": self.power,
+            "mech": self.mech,
+            "violations": [
+                {"rule_id": v.rule_id, "severity": v.severity, "autofix": v.autofix,
+                 "headline": v.headline, "why": v.why, "applied": v.applied,
+                 "verdict": v.verdict, "affected": v.affected,
+                 "fixes": [{"id": f.id, "label": f.label,
+                            "cost_idr": list(f.cost_idr) if f.cost_idr else None,
+                            "effort": f.effort, "part_id": f.part_id}
+                           for f in v.fixes]}
+                for v in self.violations],
+            "artifacts": self.artifacts,
+            "notes": self.notes,
+        }
 
     def refusal_card(self, plain: bool = False) -> str:
         """The refusal card, as text.
@@ -162,6 +204,7 @@ class Solver:
                     why="Its pinout, voltage, current and dimensions are unknown. "
                         "A build around an unverified part is a guess, and guesses "
                         "burn boards.",
+                    affected=[_ref("part", part_id=None, name=name)],
                     fixes=[Fix("A", f"Add '{name}' to the database (measure it first)",
                                None, "1 evening"),
                            Fix("B", "Use a part that is already in the database",
@@ -332,6 +375,8 @@ class Solver:
                         rule_id="R7", severity="FATAL", autofix="NONE",
                         headline=f"no free GPIO left for {s.part_id} ({s.kind})",
                         why="Every pin that can serve this signal is already in use.",
+                        affected=[_ref("signal", part_id=s.part_id, signal=s.kind,
+                                       gpio=None)],
                         fixes=[Fix("A", "Drop one peripheral", None, "edit the request")],
                         verdict="REFUSE"))
                     continue
@@ -377,6 +422,7 @@ class Solver:
                     rule = "R6"
                 else:
                     rule = "R1"
+                moved = self._reassign(s, board, used, need)
                 viol.append(Violation(
                     rule_id=rule, severity="FATAL", autofix="AUTO",
                     headline=f"GPIO {g} cannot drive {s.part_id} ({s.kind})",
@@ -385,26 +431,31 @@ class Solver:
                          "GPIO 6-11 are wired to the SPI flash and are not available."
                          if rule == "R2" else
                          "This pin has no ADC channel, so an analog sensor on it reads noise."),
-                    applied=True))
-                self._reassign(s, board, used, need)
+                    applied=True,
+                    affected=[_ref("signal", part_id=s.part_id, signal=s.kind,
+                                   gpio=g, moved_to=moved)]))
                 continue
             if s.kind == "analog_in" and wifi and "adc2" in caps:
+                moved = self._reassign(s, board, used, {"analog_in"}, prefer_adc1=True)
                 viol.append(Violation(
                     rule_id="R5", severity="FATAL", autofix="AUTO",
                     headline=f"GPIO {g} is an ADC2 channel and WiFi is enabled",
                     why="ADC2 channels stop working while the radio is active, so the "
                         "reading would be silently wrong.",
-                    applied=True))
-                self._reassign(s, board, used, {"analog_in"}, prefer_adc1=True)
+                    applied=True,
+                    affected=[_ref("signal", part_id=s.part_id, signal=s.kind,
+                                   gpio=g, moved_to=moved)]))
                 continue
             if g in p.get("strapping", []):
+                moved = self._reassign(s, board, used, need)
                 viol.append(Violation(
                     rule_id="R3", severity="WARN", autofix="AUTO",
                     headline=f"GPIO {g} is a boot-strapping pin",
                     why="Its level is sampled at reset, so the board may boot into the "
                         "wrong mode or not boot at all.",
-                    applied=True))
-                self._reassign(s, board, used, need)
+                    applied=True,
+                    affected=[_ref("signal", part_id=s.part_id, signal=s.kind,
+                                   gpio=g, moved_to=moved)]))
                 continue
             if g in p.get("uart0", []) or g in p.get("boot", []):
                 viol.append(Violation(
@@ -412,23 +463,28 @@ class Solver:
                     headline=f"GPIO {g} is the boot log / USB serial pin",
                     why="Anything wired here can stop the board from booting and hides "
                         "the error messages you need when it does.",
-                    verdict="WARN"))
+                    verdict="WARN",
+                    affected=[_ref("signal", part_id=s.part_id, signal=s.kind, gpio=g)]))
         # duplicate pin detection (R7)
         seen: dict = {}
         for s in signals:
             if s.gpio is None or s.kind in BUS_SIGNALS:
                 continue
             if s.gpio in seen:
-                viol.append(Violation(
-                    rule_id="R7", severity="FATAL", autofix="AUTO",
-                    headline=f"GPIO {s.gpio} is already assigned to {seen[s.gpio]}",
-                    why="Two peripherals on one pin: at least one of them will not "
-                        "respond, and you will debug it for an hour.",
-                    applied=True))
+                dup_gpio = s.gpio
                 need = {"digital_out": {"out"}, "pwm_out": {"out", "pwm"},
                         "digital_in": {"in"}, "analog_in": {"analog_in"},
                         "onewire": {"in"}}.get(s.kind, {"out"})
-                self._reassign(s, board, used, need)
+                moved = self._reassign(s, board, used, need)
+                viol.append(Violation(
+                    rule_id="R7", severity="FATAL", autofix="AUTO",
+                    headline=f"GPIO {dup_gpio} is already assigned to {seen[dup_gpio]}",
+                    why="Two peripherals on one pin: at least one of them will not "
+                        "respond, and you will debug it for an hour.",
+                    applied=True,
+                    affected=[_ref("signal", part_id=s.part_id, signal=s.kind,
+                                   gpio=dup_gpio, moved_to=moved),
+                              _ref("part", part_id=seen[dup_gpio])]))
             else:
                 seen[s.gpio] = s.part_id
 
@@ -441,6 +497,8 @@ class Solver:
             s.gpio = cands[0]
             used.add(cands[0])
             s.reason = "reassigned after rule check"
+            return cands[0]
+        return None
 
     def _rule_i2c(self, spec, signals, board, viol, plan=None):
         devices = []
@@ -487,6 +545,9 @@ class Solver:
                     headline=f"{other_rec['name']} and {rec['name']} both want I2C address {addr}",
                     why="A bus carries one device per address. Two devices with the same "
                         "address answer at the same time and the bus locks up.",
+                    affected=[_ref("bus", name="i2c0"),
+                              _ref("i2c", address=addr, part_id=other_rec["id"]),
+                              _ref("i2c", address=addr, part_id=rec["id"])],
                     fixes=fixes))
             else:
                 seen[addr] = (p, rec, addr)
@@ -502,6 +563,7 @@ class Solver:
                     headline="I2C bus using the ESP32 internal pull-ups",
                     why="Internal pull-ups are ~45 kOhm. I2C needs ~4.7 kOhm; at 45 kOhm "
                         "the bus will not meet rise-time limits and will fail at 400 kHz.",
+                    affected=[_ref("bus", name="i2c0")],
                     fixes=[Fix("A", "Add a 4.7 kOhm pull-up pair", (2000, 8000), "2 resistors")],
                     verdict="OFFER"))
             elif not onboard:
@@ -509,6 +571,7 @@ class Solver:
                     rule_id="R9", severity="WARN", autofix="OFFER",
                     headline="I2C bus has no pull-up resistors",
                     why="Without 4.7 kOhm pull-ups on SDA and SCL the bus cannot work.",
+                    affected=[_ref("bus", name="i2c0")],
                     fixes=[Fix("A", "Add a 4.7 kOhm pull-up pair", (2000, 8000), "2 resistors")],
                     verdict="OFFER"))
         for s in signals:
@@ -519,6 +582,8 @@ class Solver:
                     headline=f"{self.db.part(s.part_id)['name']} needs a pull-up resistor",
                     why="The data line idles high; without a pull-up it floats and the "
                         "reading is noise.",
+                    affected=[_ref("signal", part_id=s.part_id, signal=s.kind,
+                                   gpio=s.gpio)],
                     fixes=[Fix("A", "Add a 4.7-10 kOhm pull-up resistor",
                                (2000, 8000), "1 resistor")],
                     verdict="OFFER"))
@@ -543,6 +608,8 @@ class Solver:
                         headline=f"{rec['name']} cannot be powered from {forced}",
                         why=f"Its supply range is {lo}-{hi} V. Feeding it {volts} V "
                             "destroys the module.",
+                        affected=[_ref("part", part_id=rec["id"], name=rec["name"]),
+                                  _ref("rail", name=forced)],
                         fixes=[Fix("A", f"Power it from {lo} V", None, "move one jumper"),
                                Fix("B", f"Use a different part", None, "swap in the plan")]))
             # digital level mismatch
@@ -553,6 +620,9 @@ class Solver:
                     headline=f"{rec['name']} speaks {rec['logic_v']} V logic into a {board_v} V pin",
                     why="A 5 V output into a 3.3 V pin can exceed the ESP32's input "
                         "tolerance and damage the board.",
+                    affected=[_ref("part", part_id=rec["id"], name=rec["name"])]
+                             + [_ref("signal", part_id=rec["id"], signal=s.kind,
+                                     gpio=s.gpio) for s in digital],
                     fixes=[Fix("A", "Add a 4-channel BSS138 level shifter",
                                self.db.price_band("bss138-4ch"), "4 solder points"),
                            Fix("B", "Use a 3.3 V-native variant of this part",
@@ -564,6 +634,10 @@ class Solver:
                     headline=f"{rec['name']} analog output can exceed the {board_v} V ADC range",
                     why="The ADC saturates at 3.3 V. Anything above that reads as "
                         "full-scale forever -- a silent, wrong measurement.",
+                    affected=[_ref("part", part_id=rec["id"], name=rec["name"])]
+                             + [_ref("signal", part_id=rec["id"], signal=s.kind,
+                                     gpio=s.gpio)
+                                for s in sigs if s.kind == "analog_in"],
                     fixes=[Fix("A", "Add a resistor divider (measure the output first)",
                                (3000, 10000), "2 resistors"),
                            Fix("B", f"Power the sensor from {board_v} V if it allows",
@@ -577,6 +651,7 @@ class Solver:
         demand5 = 0
         external = 0
         breakdown = []
+        rail_parts: dict = {}
         for p in spec.get("peripherals", []):
             rec = self.db.part(p.get("part_id", ""))
             if not rec:
@@ -585,6 +660,7 @@ class Solver:
             rail = prof.get("power_rail", "3v3")
             peak = float(rec.get("current_peak_ma", 0)) * int(p.get("count", 1))
             breakdown.append((rec["name"], rail, peak))
+            rail_parts.setdefault(rail, []).append(rec["id"])
             if rail == "3v3":
                 demand3 += peak
             elif rail == "5v":
@@ -600,6 +676,8 @@ class Solver:
                 headline=f"{external:.0f} mA of loads must run off the board itself",
                 why="Servos, motors and LED strips draw stall current far beyond the "
                     "3V3 regulator. The board will brown out and reset.",
+                affected=[_ref("part", part_id=pid) for pid in rail_parts.get("external", [])]
+                         + [_ref("rail", name="3v3")],
                 fixes=[Fix("A", "Add a separate 5 V supply with a common ground",
                            (40000, 120000), "2 extra wires"),
                        Fix("B", "Use a PCA9685 driver on its own supply",
@@ -615,6 +693,9 @@ class Solver:
                      ", ".join(f"{n} {v:.0f} mA" for n, r, v in breakdown if r in ("3v3", "external")) +
                      (f", WiFi TX reserve {reserve} mA" if reserve else "") +
                      f". Over budget by {total3 - cap3v3:.0f} mA."),
+                affected=[_ref("rail", name="3v3")]
+                         + [_ref("part", part_id=pid)
+                            for pid in rail_parts.get("3v3", []) + rail_parts.get("external", [])],
                 fixes=[Fix("A", "Move the load to VIN (5 V) with a common ground",
                            None, "2 extra wires"),
                        Fix("B", "Add an external supply", (40000, 120000), "1 supply"),
@@ -649,6 +730,7 @@ class Solver:
                     headline=f"{rec['name']} is inductive and needs a flyback diode",
                     why="When the coil is switched off the collapsing field produces a "
                         "voltage spike that can reset the ESP32 or destroy the pin.",
+                    affected=[_ref("part", part_id=rec["id"], name=rec["name"])],
                     fixes=[Fix("A", "Add a 1N4007 diode across the coil",
                                (1000, 5000), "1 diode"),
                            Fix("B", "Use a driver board with the diodes built in",
@@ -699,6 +781,7 @@ class Solver:
                 headline=f"the parts do not fit in a {env['w']}x{env['d']} mm envelope",
                 why=f"Cell areas total {total:.0f} mm2 against a usable {capacity:.0f} mm2 "
                     f"({PACKING_EFFICIENCY:.0%} packing). Cells: " + ", ".join(detail),
+                affected=[_ref("envelope", width_mm=env["w"], depth_mm=env["d"])],
                 fixes=[Fix("A", f"Enlarge the plate to {env['w']+30}x{env['d']+30} mm",
                            (50000, 150000), "reprint"),
                        Fix("B", "Drop one peripheral", None, "edit the request"),
@@ -715,13 +798,14 @@ class Solver:
                 continue
             conf = (rec.get("dims", {}) or {}).get("confidence", rec.get("confidence"))
             if conf in ("clone-typical", "community"):
-                unsure.append(rec["name"])
+                unsure.append((rec["id"], rec["name"]))
         if unsure:
             viol.append(Violation(
                 rule_id="R16", severity="WARN", autofix="NONE",
-                headline=f"dimensions for {', '.join(unsure)} are not measured",
+                headline=f"dimensions for {', '.join(n for _i, n in unsure)} are not measured",
                 why="They come from a visually identical clone. Batch variance is real, "
                     "so the mount can be off by a millimetre or two.",
+                affected=[_ref("part", part_id=pid, name=name) for pid, name in unsure],
                 fixes=[Fix("A", "Print with a 3 mm tolerance on the mount",
                            None, "free"),
                        Fix("B", "Measure the actual part and re-run", None, "10 minutes")],

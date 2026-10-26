@@ -1,0 +1,67 @@
+{
+  "db_version": "0.3",
+  "board": "esp32-devkitc-v4",
+  "verdict": "REFUSE",
+  "signals": [],
+  "i2c": {},
+  "power": {},
+  "mech": {},
+  "violations": [
+    {
+      "rule_id": "R15",
+      "severity": "FATAL",
+      "autofix": "NONE",
+      "headline": "'flux capacitor' is not in the verified parts database",
+      "why": "Its pinout, voltage, current and dimensions are unknown. A build around an unverified part is a guess, and guesses burn boards.",
+      "applied": false,
+      "verdict": "REFUSE",
+      "affected": [
+        {
+          "kind": "part",
+          "part_id": null,
+          "name": "flux capacitor"
+        }
+      ],
+      "fixes": [
+        {
+          "id": "A",
+          "label": "Add 'flux capacitor' to the database (measure it first)",
+          "cost_idr": null,
+          "effort": "1 evening",
+          "part_id": null
+        },
+        {
+          "id": "B",
+          "label": "Use a part that is already in the database",
+          "cost_idr": null,
+          "effort": "swap in the plan",
+          "part_id": null
+        }
+      ]
+    }
+  ],
+  "artifacts": {},
+  "notes": [],
+  "_source": {
+    "prompt": "a flux capacitor and an oled display",
+    "spec": {
+      "board": "esp32-devkitc-v4",
+      "goal": "A flux capacitor next to an oled display",
+      "peripherals": [
+        {
+          "part_id": "UNKNOWN:flux capacitor",
+          "role": "the thing that is not in the database"
+        },
+        {
+          "part_id": "ssd1306-096",
+          "role": "display"
+        }
+      ],
+      "constraints": {
+        "mechanical": {
+          "mount_style": "free"
+        }
+      }
+    }
+  }
+}

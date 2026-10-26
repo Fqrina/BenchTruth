@@ -161,6 +161,8 @@ Meta model.
 | `AGENTS.md` | how to work on this project (read first) |
 | `docs/OFFICIAL_RULES.md` | the participant guide, extracted — **normative** |
 | `docs/BUILD_LOG.md` | what was built, day by day |
+| `docs/PLAN_UI.md` | the specification for the UI: the pin map, the wire faults, the API |
+| `docs/fixtures/` | real plan fixtures — the three states the UI must handle |
 | `docs/DEMO_SCRIPT.md` | the shot list for the 3-minute video |
 | `CONTEXT.md` | why it exists, the competitive landscape, the positioning |
 | `PLAN.md` | the timeline and the day-by-day guide |
