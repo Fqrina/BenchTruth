@@ -1,0 +1,169 @@
+{
+  "_meta": {
+    "purpose": "20 hand-built specs that are either physically impossible or need a costed fix. Ground truth is definitional here - unlike a defect-detection benchmark, nobody can argue with 'two devices cannot share I2C address 0x3C'. This is your eval set and your headline number.",
+    "how_to_report": "verdict must be one of: REFUSE (fatal, no auto-fix), FIXED (auto-fix applied, report the change), WARN (built with a caveat), BUILD (valid). The solver's output must match expected_verdict and cite expected_rule.",
+    "headline": "On 20 conflicting specs: X refused/fixed correctly, Y wrong, Z false refusals on the 3 positive controls."
+  },
+  "cases": [
+    {
+      "id": "C01",
+      "prompt": "Build an ESP32 plant monitor with an SSD1306 OLED (0x3C) and a second SSD1306 OLED (0x3C) so I can see two screens.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R8",
+      "expected_verdict": "OFFER",
+      "note": "Classic. Fix: 0x3D variant, TCA9548A mux, or drop one."
+    },
+    {
+      "id": "C02",
+      "prompt": "Add an HC-SR04 ultrasonic sensor to my ESP32 and read the distance.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R10",
+      "expected_verdict": "OFFER",
+      "note": "ECHO idles at 5 V into a 3.3 V pin. Needs a level shifter."
+    },
+    {
+      "id": "C03",
+      "prompt": "Control a servo from the ESP32 to open a valve.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R11",
+      "expected_verdict": "OFFER",
+      "note": "Servo power from the 3V3 rail will brown out the board."
+    },
+    {
+      "id": "C04",
+      "prompt": "Read the soil moisture sensor on GPIO 13 and also send data over WiFi.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R5",
+      "expected_verdict": "FIXED",
+      "note": "GPIO 13 is ADC2 - invalid while WiFi is on. Move to ADC1 (32-39)."
+    },
+    {
+      "id": "C05",
+      "prompt": "Connect a servo signal to GPIO 34 on my ESP32.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R1",
+      "expected_verdict": "FIXED",
+      "note": "GPIO 34 is input-only."
+    },
+    {
+      "id": "C06",
+      "prompt": "Use GPIO 11 for a button input.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R2",
+      "expected_verdict": "FIXED",
+      "note": "GPIO 11 is wired to the SPI flash."
+    },
+    {
+      "id": "C07",
+      "prompt": "Put a temperature sensor on GPIO 4 and an OLED on the same pin too.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R7",
+      "expected_verdict": "FIXED",
+      "note": "One pin, two peripherals."
+    },
+    {
+      "id": "C08",
+      "prompt": "Add an INA219 current sensor module.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R15",
+      "expected_verdict": "REFUSE",
+      "note": "Not in the DB. Must refuse rather than guess - this is the integrity test."
+    },
+    {
+      "id": "C09",
+      "prompt": "Drive a 4-channel relay module from the ESP32 to switch a pump.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R13",
+      "expected_verdict": "OFFER",
+      "note": "Inductive load. Flyback diode required."
+    },
+    {
+      "id": "C10",
+      "prompt": "Power a WS2812B strip of 30 LEDs from the ESP32 board.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R12",
+      "expected_verdict": "OFFER",
+      "note": "30 x 60 mA = 1.8 A. Never from 3V3."
+    },
+    {
+      "id": "C11",
+      "prompt": "Power a WS2812B strip of 30 LEDs from the ESP32 board.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R12",
+      "expected_verdict": "OFFER",
+      "note": "Duplicate of C10 with different phrasing - tests robustness to paraphrase, and that you did not hardcode the prompt."
+    },
+    {
+      "id": "C12",
+      "prompt": "Mount everything on a grid plate 100mm x 60mm: ESP32, OLED, DHT22, soil sensor, buzzer.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R14",
+      "expected_verdict": "OFFER",
+      "note": "Footprints do not fit 100x60 with clearance. Either enlarge the plate, stack, or use adapters."
+    },
+    {
+      "id": "C13",
+      "prompt": "Show temperature on an OLED and read an MPU6050 IMU at the same time.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": null,
+      "expected_verdict": "BUILD",
+      "note": "POSITIVE CONTROL. 0x3C and 0x68 do not collide. Must NOT refuse, and no rule may fire."
+    },
+    {
+      "id": "C14",
+      "prompt": "Read a DHT22 and show it on the OLED, plus a buzzer alert.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R9",
+      "expected_verdict": "OFFER",
+      "note": "Valid build, but the DHT22 data line needs a pull-up: the solver must offer one."
+    },
+    {
+      "id": "C15",
+      "prompt": "Drive 6 servos plus 4 sensors from one ESP32 DevKitC.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R11",
+      "expected_verdict": "OFFER",
+      "note": "6 x 250 mA stall = 1.5 A on one board. Offer PCA9685 + external supply."
+    },
+    {
+      "id": "C16",
+      "prompt": "Use the ESP32 internal pull-up for the I2C bus.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R9",
+      "expected_verdict": "OFFER",
+      "note": "Internal pull-ups (~45 kOhm) are far too weak for I2C. Needs external 4.7k."
+    },
+    {
+      "id": "C17",
+      "prompt": "Power a BME280 from the 5V breadboard rail.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R10",
+      "expected_verdict": "OFFER",
+      "note": "BME280 max supply is 3.6 V. Different direction of level mismatch."
+    },
+    {
+      "id": "C18",
+      "prompt": "Drive a piezo buzzer from GPIO 2.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R3",
+      "expected_verdict": "FIXED",
+      "note": "GPIO 2 is a boot-strapping pin: the solver must move it."
+    },
+    {
+      "id": "C19",
+      "prompt": "Make a device that shows the time on an OLED.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": null,
+      "expected_verdict": "BUILD",
+      "note": "POSITIVE CONTROL. Trivially valid - must not refuse. Guards against an over-eager validator."
+    },
+    {
+      "id": "C20",
+      "prompt": "Print a custom enclosure that holds the ESP32, the OLED, the DHT22 and the soil sensor, 120mm x 80mm x 40mm.",
+      "board": "esp32-devkitc-v4",
+      "expected_rule": "R16",
+      "expected_verdict": "WARN",
+      "note": "Valid layout but dimensions come from clone-typical data, so flag measurement uncertainty."
+    }
+  ]
+}

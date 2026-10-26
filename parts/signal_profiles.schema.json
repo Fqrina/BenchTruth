@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Signal profiles",
+  "description": "The electrical interface of each part: which signals the MCU must provide, which rail it draws from, whether it carries its own pull-ups, and which simulator part represents it. Kept separate from parts_db.json (mechanical + price + sourcing) so both can evolve independently. The solver reads BOTH.",
+  "type": "object",
+  "minProperties": 1,
+  "additionalProperties": {
+    "type": "object",
+    "required": ["default_signals", "power_rail"],
+    "properties": {
+      "default_signals": {
+        "type": "array",
+        "description": "What the MCU must provide for this part. NEVER a pin number -- the solver allocates. Empty is valid for a passive part (a level shifter needs no pins).",
+        "items": {
+          "type": "object",
+          "required": ["signal", "direction"],
+          "properties": {
+            "signal": {
+              "type": "string",
+              "enum": ["digital_in", "digital_out", "pwm_out", "analog_in", "i2c", "spi", "uart", "onewire"]
+            },
+            "direction": { "type": "string", "enum": ["in", "out", "bidirectional"] },
+            "note": { "type": "string" }
+          }
+        }
+      },
+      "power_rail": {
+        "type": "string",
+        "enum": ["3v3", "5v", "external"],
+        "description": "3v3 = the logic rail; 5v = VIN / the 5V rail; external = the part needs its own supply (servos, LED strips)."
+      },
+      "pullups_needed": { "type": "boolean" },
+      "onboard_pullups": { "type": "boolean" },
+      "signal_multiplicity": {
+        "type": "string",
+        "enum": ["per_unit", "per_part"],
+        "default": "per_unit",
+        "description": "per_unit: count multiplies the number of signals (six servos = six PWM pins). per_part: count multiplies the load but not the signals (one data line for a 30-LED strip)."
+      },
+      "library": { "type": ["string", "null"] },
+      "wokwi_name": {
+        "type": ["string", "null"],
+        "description": "The Wokwi part name, or null if Wokwi has no equivalent. A part with null is excluded from the simulation and the plan says so in notes."
+      },
+      "vision_aliases": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Text prompts used to describe this part to a segmentation model."
+      },
+      "keywords": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Words a user might type, used by the offline fallback parser to map free text onto a part id."
+      },
+      "notes": { "type": "string" }
+    }
+  }
+}

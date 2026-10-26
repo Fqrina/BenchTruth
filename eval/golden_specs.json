@@ -1,0 +1,243 @@
+{
+  "_meta": {
+    "purpose": "Hand-written specs for the 20 eval cases. Deterministic: the solver eval never calls the LLM, so the headline number measures the solver, not the model's mood.",
+    "note": "requested_pins are used where the user explicitly names a pin -- the solver honours the request and then the rules judge it. That is how R1/R2/R5/R6/R7 become reachable."
+  },
+  "specs": [
+    {
+      "id": "C01",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Two OLED screens showing different readings",
+        "peripherals": [
+          {"part_id": "ssd1306-096", "role": "display A"},
+          {"part_id": "ssd1306-096", "role": "display B"}
+        ],
+        "constraints": {"power": {"external_supply_allowed": true}, "mechanical": {"mount_style": "free"}}
+      }
+    },
+    {
+      "id": "C02",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Measure distance with an ultrasonic sensor",
+        "peripherals": [{"part_id": "hc-sr04", "role": "distance sensor"}],
+        "constraints": {"power": {"external_supply_allowed": true}, "mechanical": {"mount_style": "free"}}
+      }
+    },
+    {
+      "id": "C03",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Gas alarm with a servo that opens a vent",
+        "peripherals": [
+          {"part_id": "sg90", "role": "vent servo"},
+          {"part_id": "hc-sr04", "role": "tank level"}
+        ],
+        "constraints": {
+          "connectivity": ["wifi"],
+          "power": {"external_supply_allowed": false},
+          "mechanical": {"mount_style": "free"}
+        }
+      }
+    },
+    {
+      "id": "C04",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Log soil moisture to the cloud over WiFi",
+        "peripherals": [{"part_id": "soil-capacitive", "role": "soil probe"}],
+        "requested_pins": [{"part_id": "soil-capacitive", "signal": "analog_in", "gpio": 13}],
+        "constraints": {
+          "connectivity": ["wifi"],
+          "power": {"external_supply_allowed": true},
+          "mechanical": {"mount_style": "free"}
+        }
+      }
+    },
+    {
+      "id": "C05",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Servo on GPIO 34",
+        "peripherals": [{"part_id": "sg90", "role": "servo"}],
+        "requested_pins": [{"part_id": "sg90", "signal": "pwm_out", "gpio": 34}],
+        "constraints": {"power": {"external_supply_allowed": true}, "mechanical": {"mount_style": "free"}}
+      }
+    },
+    {
+      "id": "C06",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Alarm buzzer on GPIO 11",
+        "peripherals": [{"part_id": "piezo-buzzer", "role": "buzzer"}],
+        "requested_pins": [{"part_id": "piezo-buzzer", "signal": "digital_out", "gpio": 11}],
+        "constraints": {"power": {"external_supply_allowed": true}, "mechanical": {"mount_style": "free"}}
+      }
+    },
+    {
+      "id": "C07",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Buzzer and soil sensor sharing one pin",
+        "peripherals": [
+          {"part_id": "piezo-buzzer", "role": "buzzer"},
+          {"part_id": "soil-capacitive", "role": "soil probe"}
+        ],
+        "requested_pins": [
+          {"part_id": "piezo-buzzer", "signal": "digital_out", "gpio": 27},
+          {"part_id": "soil-capacitive", "signal": "analog_in", "gpio": 27}
+        ],
+        "constraints": {"power": {"external_supply_allowed": true}, "mechanical": {"mount_style": "free"}}
+      }
+    },
+    {
+      "id": "C08",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Measure bus current with an INA219",
+        "peripherals": [{"part_id": "UNKNOWN:ina219", "role": "current sensor"}],
+        "constraints": {"power": {"external_supply_allowed": true}, "mechanical": {"mount_style": "free"}}
+      }
+    },
+    {
+      "id": "C09",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Switch a pump with a relay",
+        "peripherals": [{"part_id": "relay-4ch", "role": "pump relay"}],
+        "constraints": {"power": {"external_supply_allowed": true}, "mechanical": {"mount_style": "free"}}
+      }
+    },
+    {
+      "id": "C10",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "30 RGB LEDs from the board",
+        "peripherals": [{"part_id": "ws2812b-strip", "role": "strip", "count": 30}],
+        "constraints": {"power": {"external_supply_allowed": false}, "mechanical": {"mount_style": "free"}}
+      }
+    },
+    {
+      "id": "C11",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Five RGB LEDs powered from the board",
+        "peripherals": [{"part_id": "ws2812b-strip", "role": "strip", "count": 5}],
+        "constraints": {"power": {"external_supply_allowed": false}, "mechanical": {"mount_style": "free"}}
+      }
+    },
+    {
+      "id": "C12",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Plant monitor on a small grid plate",
+        "peripherals": [
+          {"part_id": "ssd1306-096", "role": "display"},
+          {"part_id": "dht22", "role": "air sensor"},
+          {"part_id": "soil-capacitive", "role": "soil probe"},
+          {"part_id": "piezo-buzzer", "role": "buzzer"}
+        ],
+        "constraints": {
+          "power": {"external_supply_allowed": true},
+          "mechanical": {"mount_style": "grid_plate", "grid_pitch_mm": 10,
+                         "max_envelope_mm": {"w": 100, "d": 60, "h": 30}}
+        }
+      }
+    },
+    {
+      "id": "C13",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Show temperature and read the IMU at the same time",
+        "peripherals": [
+          {"part_id": "ssd1306-096", "role": "display"},
+          {"part_id": "mpu6050", "role": "imu"}
+        ],
+        "constraints": {"power": {"external_supply_allowed": true}, "mechanical": {"mount_style": "free"}}
+      }
+    },
+    {
+      "id": "C14",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Show temperature on an OLED and add a buzzer alert",
+        "peripherals": [
+          {"part_id": "dht22", "role": "air sensor"},
+          {"part_id": "ssd1306-096", "role": "display"}
+        ],
+        "constraints": {"power": {"external_supply_allowed": true}, "mechanical": {"mount_style": "free"}}
+      }
+    },
+    {
+      "id": "C15",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Six servos plus four sensors from one board",
+        "peripherals": [
+          {"part_id": "sg90", "role": "servos", "count": 6},
+          {"part_id": "soil-capacitive", "role": "soil probe"},
+          {"part_id": "dht22", "role": "air sensor"}
+        ],
+        "constraints": {"power": {"external_supply_allowed": false}, "mechanical": {"mount_style": "free"}}
+      }
+    },
+    {
+      "id": "C16",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Use the ESP32 internal pull-ups for the I2C bus",
+        "peripherals": [{"part_id": "ssd1306-096", "role": "display"}],
+        "constraints": {
+          "power": {"external_supply_allowed": true},
+          "mechanical": {"mount_style": "free"},
+          "i2c_pullup_mode": "internal"
+        }
+      }
+    },
+    {
+      "id": "C17",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "BME280 powered from the 5V rail",
+        "peripherals": [{"part_id": "bme280", "role": "air sensor", "power": "5v"}],
+        "constraints": {"power": {"external_supply_allowed": true}, "mechanical": {"mount_style": "free"}}
+      }
+    },
+    {
+      "id": "C18",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Alarm buzzer on GPIO 2",
+        "peripherals": [{"part_id": "piezo-buzzer", "role": "buzzer"}],
+        "requested_pins": [{"part_id": "piezo-buzzer", "signal": "digital_out", "gpio": 2}],
+        "constraints": {"power": {"external_supply_allowed": true}, "mechanical": {"mount_style": "free"}}
+      }
+    },
+    {
+      "id": "C19",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Show the time on an OLED",
+        "peripherals": [{"part_id": "ssd1306-096", "role": "clock display"}],
+        "constraints": {"power": {"external_supply_allowed": true}, "mechanical": {"mount_style": "free"}}
+      }
+    },
+    {
+      "id": "C20",
+      "spec": {
+        "board": "esp32-devkitc-v4",
+        "goal": "Custom enclosure holding the display and the soil probe",
+        "peripherals": [
+          {"part_id": "ssd1306-096", "role": "display"},
+          {"part_id": "soil-capacitive", "role": "soil probe"}
+        ],
+        "constraints": {
+          "power": {"external_supply_allowed": true},
+          "mechanical": {"mount_style": "enclosure", "grid_pitch_mm": 10,
+                         "max_envelope_mm": {"w": 120, "d": 80, "h": 40}}
+        }
+      }
+    }
+  ]
+}

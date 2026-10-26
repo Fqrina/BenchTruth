@@ -1,0 +1,440 @@
+{
+  "hc-sr04": {
+    "default_signals": [
+      {
+        "signal": "digital_out",
+        "direction": "out"
+      },
+      {
+        "signal": "digital_in",
+        "direction": "in"
+      }
+    ],
+    "power_rail": "5v",
+    "pullups_needed": false,
+    "onboard_pullups": false,
+    "library": null,
+    "wokwi_name": "wokwi-hc-sr04",
+    "vision_aliases": [
+      "ultrasonic distance sensor",
+      "sonar sensor"
+    ],
+    "keywords": [
+      "ultrasonic",
+      "distance",
+      "sonar",
+      "hc-sr04"
+    ]
+  },
+  "dht22": {
+    "default_signals": [
+      {
+        "signal": "digital_in",
+        "direction": "in"
+      }
+    ],
+    "power_rail": "3v3",
+    "pullups_needed": true,
+    "onboard_pullups": false,
+    "library": "DHT",
+    "wokwi_name": "wokwi-dht22",
+    "vision_aliases": [
+      "temperature humidity sensor",
+      "dht22 sensor"
+    ],
+    "keywords": [
+      "dht22",
+      "temperature",
+      "humidity",
+      "weather"
+    ]
+  },
+  "ssd1306-096": {
+    "default_signals": [
+      {
+        "signal": "i2c",
+        "direction": "bidirectional"
+      }
+    ],
+    "power_rail": "3v3",
+    "pullups_needed": false,
+    "onboard_pullups": true,
+    "library": "Adafruit_SSD1306",
+    "wokwi_name": "wokwi-ssd1306",
+    "vision_aliases": [
+      "oled display",
+      "oled screen",
+      "small display"
+    ],
+    "keywords": [
+      "oled",
+      "display",
+      "screen",
+      "ssd1306"
+    ]
+  },
+  "sg90": {
+    "default_signals": [
+      {
+        "signal": "pwm_out",
+        "direction": "out"
+      }
+    ],
+    "power_rail": "external",
+    "pullups_needed": false,
+    "onboard_pullups": false,
+    "library": "ESP32Servo",
+    "wokwi_name": "wokwi-servo",
+    "vision_aliases": [
+      "servo motor",
+      "small servo"
+    ],
+    "keywords": [
+      "servo",
+      "sg90",
+      "actuator"
+    ]
+  },
+  "mg996r": {
+    "default_signals": [
+      {
+        "signal": "pwm_out",
+        "direction": "out"
+      }
+    ],
+    "power_rail": "external",
+    "pullups_needed": false,
+    "onboard_pullups": false,
+    "library": "ESP32Servo",
+    "wokwi_name": "wokwi-servo",
+    "vision_aliases": [
+      "servo motor",
+      "metal gear servo"
+    ],
+    "keywords": [
+      "servo",
+      "mg996r",
+      "metal gear"
+    ]
+  },
+  "pca9685": {
+    "default_signals": [
+      {
+        "signal": "i2c",
+        "direction": "bidirectional"
+      }
+    ],
+    "power_rail": "3v3",
+    "pullups_needed": false,
+    "onboard_pullups": true,
+    "library": "Adafruit_PCA9685",
+    "wokwi_name": "wokwi-pca9685",
+    "vision_aliases": [
+      "pwm driver board",
+      "servo driver board"
+    ],
+    "keywords": [
+      "pca9685",
+      "pwm driver",
+      "servo driver"
+    ]
+  },
+  "tca9548a": {
+    "default_signals": [
+      {
+        "signal": "i2c",
+        "direction": "bidirectional"
+      }
+    ],
+    "power_rail": "3v3",
+    "pullups_needed": false,
+    "onboard_pullups": true,
+    "library": "Adafruit_TCA9548A",
+    "wokwi_name": null,
+    "vision_aliases": [
+      "i2c multiplexer board",
+      "i2c switch board"
+    ],
+    "keywords": [
+      "tca9548a",
+      "mux",
+      "multiplexer"
+    ]
+  },
+  "bss138-4ch": {
+    "default_signals": [],
+    "power_rail": "3v3",
+    "pullups_needed": false,
+    "onboard_pullups": false,
+    "library": null,
+    "wokwi_name": null,
+    "accessory": true,
+    "vision_aliases": [
+      "level shifter board"
+    ],
+    "keywords": [
+      "level shifter",
+      "bss138",
+      "logic level"
+    ]
+  },
+  "bh1750": {
+    "default_signals": [
+      {
+        "signal": "i2c",
+        "direction": "bidirectional"
+      }
+    ],
+    "power_rail": "3v3",
+    "pullups_needed": false,
+    "onboard_pullups": true,
+    "library": "Wire",
+    "wokwi_name": null,
+    "vision_aliases": [
+      "light sensor module",
+      "brightness sensor"
+    ],
+    "keywords": [
+      "bh1750",
+      "light",
+      "lux",
+      "brightness"
+    ]
+  },
+  "mpu6050": {
+    "default_signals": [
+      {
+        "signal": "i2c",
+        "direction": "bidirectional"
+      }
+    ],
+    "power_rail": "3v3",
+    "pullups_needed": false,
+    "onboard_pullups": true,
+    "library": "Adafruit_MPU6050",
+    "wokwi_name": "wokwi-mpu6050",
+    "vision_aliases": [
+      "imu module",
+      "accelerometer board"
+    ],
+    "keywords": [
+      "mpu6050",
+      "imu",
+      "accelerometer",
+      "gyro"
+    ]
+  },
+  "bme280": {
+    "default_signals": [
+      {
+        "signal": "i2c",
+        "direction": "bidirectional"
+      }
+    ],
+    "power_rail": "3v3",
+    "pullups_needed": false,
+    "onboard_pullups": true,
+    "library": "Adafruit_BME280",
+    "wokwi_name": "wokwi-bme280",
+    "vision_aliases": [
+      "bme280 sensor",
+      "pressure humidity sensor"
+    ],
+    "keywords": [
+      "bme280",
+      "pressure",
+      "barometer",
+      "temperature"
+    ]
+  },
+  "ds18b20": {
+    "default_signals": [
+      {
+        "signal": "onewire",
+        "direction": "bidirectional"
+      }
+    ],
+    "power_rail": "3v3",
+    "pullups_needed": true,
+    "onboard_pullups": false,
+    "library": "OneWire",
+    "wokwi_name": null,
+    "vision_aliases": [
+      "waterproof probe",
+      "temperature probe"
+    ],
+    "keywords": [
+      "ds18b20",
+      "probe",
+      "onewire",
+      "waterproof"
+    ]
+  },
+  "soil-capacitive": {
+    "default_signals": [
+      {
+        "signal": "analog_in",
+        "direction": "in"
+      }
+    ],
+    "power_rail": "3v3",
+    "pullups_needed": false,
+    "onboard_pullups": false,
+    "library": null,
+    "wokwi_name": null,
+    "vision_aliases": [
+      "soil moisture sensor",
+      "soil probe"
+    ],
+    "keywords": [
+      "soil",
+      "moisture",
+      "plant",
+      "capacitive"
+    ]
+  },
+  "relay-4ch": {
+    "default_signals": [
+      {
+        "signal": "digital_out",
+        "direction": "out"
+      },
+      {
+        "signal": "digital_out",
+        "direction": "out"
+      },
+      {
+        "signal": "digital_out",
+        "direction": "out"
+      },
+      {
+        "signal": "digital_out",
+        "direction": "out"
+      }
+    ],
+    "power_rail": "5v",
+    "pullups_needed": false,
+    "onboard_pullups": false,
+    "library": null,
+    "wokwi_name": "wokwi-relay",
+    "vision_aliases": [
+      "relay module",
+      "relay board"
+    ],
+    "keywords": [
+      "relay",
+      "switch",
+      "pump"
+    ]
+  },
+  "ws2812b-strip": {
+    "default_signals": [
+      {
+        "signal": "digital_out",
+        "direction": "out"
+      }
+    ],
+    "power_rail": "external",
+    "pullups_needed": false,
+    "onboard_pullups": false,
+    "library": "Adafruit_NeoPixel",
+    "wokwi_name": "wokwi-led-strip",
+    "vision_aliases": [
+      "led strip",
+      "rgb led strip"
+    ],
+    "keywords": [
+      "ws2812b",
+      "led",
+      "neopixel",
+      "strip",
+      "rgb"
+    ],
+    "signal_multiplicity": "per_part"
+  },
+  "uln2003-28byj": {
+    "default_signals": [
+      {
+        "signal": "digital_out",
+        "direction": "out"
+      },
+      {
+        "signal": "digital_out",
+        "direction": "out"
+      },
+      {
+        "signal": "digital_out",
+        "direction": "out"
+      },
+      {
+        "signal": "digital_out",
+        "direction": "out"
+      }
+    ],
+    "power_rail": "external",
+    "pullups_needed": false,
+    "onboard_pullups": false,
+    "library": "Stepper",
+    "wokwi_name": null,
+    "vision_aliases": [
+      "stepper driver board",
+      "motor driver board"
+    ],
+    "keywords": [
+      "stepper",
+      "uln2003",
+      "motor",
+      "28byj"
+    ]
+  },
+  "piezo-buzzer": {
+    "default_signals": [
+      {
+        "signal": "digital_out",
+        "direction": "out"
+      }
+    ],
+    "power_rail": "3v3",
+    "pullups_needed": false,
+    "onboard_pullups": false,
+    "library": null,
+    "wokwi_name": "wokwi-buzzer",
+    "vision_aliases": [
+      "piezo buzzer",
+      "small speaker"
+    ],
+    "keywords": [
+      "buzzer",
+      "alarm",
+      "beep",
+      "piezo"
+    ]
+  },
+  "mq2": {
+    "default_signals": [
+      {
+        "signal": "analog_in",
+        "direction": "in"
+      }
+    ],
+    "power_rail": "5v",
+    "pullups_needed": false,
+    "onboard_pullups": false,
+    "library": null,
+    "wokwi_name": null,
+    "vision_aliases": [
+      "gas sensor module",
+      "mq-2 sensor",
+      "smoke sensor"
+    ],
+    "keywords": [
+      "mq2",
+      "mq-2",
+      "gas",
+      "smoke",
+      "smell",
+      "lpg",
+      "leak"
+    ]
+  }
+}

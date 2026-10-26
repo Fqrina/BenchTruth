@@ -1,0 +1,178 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Parts DB",
+  "description": "Hand-measured ground truth. CI must fail if a part is missing required fields.",
+  "type": "object",
+  "required": ["db_version", "boards", "parts"],
+  "properties": {
+    "db_version": { "type": "string" },
+    "_meta": { "type": "object" },
+    "boards": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "logic_v", "pins", "rails", "dims"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "name": { "type": "string" },
+          "logic_v": { "type": "number", "enum": [1.8, 3.3, 5.0] },
+          "pins": {
+            "type": "object",
+            "required": ["input_only", "flash_reserved", "strapping", "adc1", "adc2", "pwm_ledc"],
+            "properties": {
+              "input_only": { "type": "array", "items": { "type": "integer" } },
+              "flash_reserved": { "type": "array", "items": { "type": "integer" } },
+              "strapping": { "type": "array", "items": { "type": "integer" } },
+              "usb_native": { "type": "array", "items": { "type": "integer" } },
+              "uart0": { "type": "array", "items": { "type": "integer" } },
+              "boot": { "type": "array", "items": { "type": "integer" } },
+              "adc1": { "type": "array", "items": { "type": "integer" } },
+              "adc2": { "type": "array", "items": { "type": "integer" } },
+              "dac": { "type": "array", "items": { "type": "integer" } },
+              "touch": { "type": "array", "items": { "type": "integer" } },
+              "pwm_ledc": { "type": "array", "items": { "type": "integer" } },
+              "i2c_default": { "type": "object" },
+              "spi_vspi": { "type": "object" }
+            }
+          },
+          "rails": {
+            "type": "object",
+            "required": ["3v3"],
+            "properties": {
+              "3v3": {
+                "type": "object",
+                "required": ["recommended_max_ma"],
+                "properties": {
+                  "source": { "type": "string" },
+                  "recommended_max_ma": { "type": "integer", "minimum": 1 },
+                  "absolute_max_ma": { "type": "integer", "minimum": 1 }
+                }
+              },
+              "5v_vin": {
+                "type": "object",
+                "properties": {
+                  "recommended_max_ma": { "type": "integer", "minimum": 1 }
+                }
+              }
+            }
+          },
+          "dims": { "$ref": "#/definitions/dims" }
+        }
+      }
+    },
+    "parts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "name", "source_url", "price_idr_min", "price_idr_max", "price_date",
+          "logic_v", "supply_v_min", "supply_v_max",
+          "current_idle_ma", "current_peak_ma", "iface", "dims", "mount",
+          "needs_level_shift", "needs_external_supply", "needs_flyback", "confidence"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "name": { "type": "string", "minLength": 2 },
+          "source_url": { "type": "string", "pattern": "^https?://.+" },
+          "price_idr_min": { "type": "integer", "minimum": 0 },
+          "price_idr_max": { "type": "integer", "minimum": 0 },
+          "price_date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+          "pack_size": { "type": "integer", "minimum": 1 },
+          "logic_v": { "type": "number", "enum": [1.8, 3.3, 5.0] },
+          "supply_v_min": { "type": "number" },
+          "supply_v_max": { "type": "number" },
+          "current_idle_ma": { "type": "number", "minimum": 0 },
+          "current_peak_ma": { "type": "number", "minimum": 0 },
+          "iface": {
+            "type": "object",
+            "required": ["type", "pins"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["i2c", "spi", "uart", "onewire", "analog", "digital", "pwm"]
+              },
+              "pins": { "type": "array", "items": { "type": "string" } },
+              "i2c_addr_default": { "type": ["string", "null"], "pattern": "^0x[0-9A-Fa-f]{2}$" },
+              "i2c_addr_options": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "dims": { "$ref": "#/definitions/dims" },
+          "mount": {
+            "type": "object",
+            "required": ["holes", "standoff_mm", "header_pitch_mm"],
+            "properties": {
+              "holes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["x_mm", "y_mm", "dia_mm"],
+                  "properties": {
+                    "x_mm": { "type": "number" },
+                    "y_mm": { "type": "number" },
+                    "dia_mm": { "type": "number", "exclusiveMinimum": 0 }
+                  }
+                }
+              },
+              "standoff_mm": { "type": "number", "minimum": 0 },
+              "header_pitch_mm": { "type": "number", "exclusiveMinimum": 0 },
+              "hole_note": { "type": "string" }
+            }
+          },
+          "keepouts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["side", "w_mm", "d_mm"],
+              "properties": {
+                "side": { "type": "string", "enum": ["top", "bottom", "front", "rear", "left", "right"] },
+                "w_mm": { "type": "number" },
+                "d_mm": { "type": "number" }
+              }
+            }
+          },
+          "needs_level_shift": { "type": "boolean" },
+          "needs_external_supply": { "type": "boolean" },
+          "needs_flyback": { "type": "boolean" },
+          "confidence": {
+            "type": "string",
+            "enum": ["datasheet", "measured", "clone-typical", "community"]
+          },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "consumables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "price_idr_min", "price_idr_max", "price_date"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "price_idr_min": { "type": "integer" },
+          "price_idr_max": { "type": "integer" },
+          "price_date": { "type": "string" },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "dims": {
+      "type": "object",
+      "required": ["w_mm", "d_mm", "h_mm", "shape_class", "confidence"],
+      "properties": {
+        "w_mm": { "type": "number", "exclusiveMinimum": 0 },
+        "d_mm": { "type": "number", "exclusiveMinimum": 0 },
+        "h_mm": { "type": "number", "exclusiveMinimum": 0 },
+        "tolerance_mm": { "type": "number", "minimum": 0 },
+        "shape_class": { "type": "string", "enum": ["rect", "cyl", "L"] },
+        "confidence": {
+          "type": "string",
+          "enum": ["datasheet", "measured", "clone-typical", "community"]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+# Normalise line endings in the repository: LF in git, LF in the working tree.
+# Keeps diffs clean and CI (Linux) identical to local (Windows).
+* text=auto eol=lf
+
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf

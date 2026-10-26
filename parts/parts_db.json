@@ -1,0 +1,1099 @@
+{
+  "_meta": {
+    "version": "0.1",
+    "purpose": "Hand-curated ground truth: every part carries a real source, a dated price band, and a measurement confidence. This file is the moat. Never let an LLM generate values in here.",
+    "confidence_legend": {
+      "datasheet": "value taken verbatim from manufacturer datasheet",
+      "measured": "value measured on the physical SKU you will link in the store (caliper, 3 samples)",
+      "clone-typical": "value copied from a visually identical clone - MUST be re-measured before it is trusted"
+    },
+    "datum_convention": "Every part's hole coordinates and keepouts are relative to the SAME datum: the bottom-left corner of the body bounding box, X to the right, Y away from the viewer, Z up. Do not mix conventions.",
+    "required_fields_per_part": [
+      "id, name, source_url, price_idr_min, price_idr_max, price_date",
+      "logic_v, supply_v_min, supply_v_max",
+      "current_idle_ma, current_peak_ma",
+      "iface.type, iface.pins[], iface.i2c_addr_default, iface.i2c_addr_options[]",
+      "dims.w_mm, dims.d_mm, dims.h_mm, dims.shape_class, dims.tolerance_mm",
+      "mount.holes[] {x_mm, y_mm, dia_mm}, mount.standoff_mm, mount.header_pitch_mm",
+      "keepouts[] {side, w_mm, d_mm}",
+      "needs_level_shift, needs_external_supply, needs_flyback",
+      "confidence, notes"
+    ]
+  },
+  "boards": [
+    {
+      "id": "esp32-devkitc-v4",
+      "name": "ESP32 DevKitC V4 (ESP32-WROOM-32, 30-pin)",
+      "logic_v": 3.3,
+      "pins": {
+        "input_only": [
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ],
+        "flash_reserved": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "strapping": [
+          0,
+          2,
+          5,
+          12,
+          15
+        ],
+        "usb_native": [
+          19,
+          20
+        ],
+        "uart0": [
+          1,
+          3
+        ],
+        "boot": [
+          0
+        ],
+        "adc1": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          39
+        ],
+        "adc2": [
+          0,
+          2,
+          4,
+          12,
+          13,
+          14,
+          15,
+          25,
+          26,
+          27
+        ],
+        "dac": [
+          25,
+          26
+        ],
+        "touch": [
+          4,
+          13,
+          14,
+          15,
+          27,
+          32,
+          33
+        ],
+        "pwm_ledc": [
+          2,
+          4,
+          5,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          21,
+          22,
+          23,
+          25,
+          26,
+          27,
+          32,
+          33
+        ],
+        "i2c_default": {
+          "sda": 21,
+          "scl": 22
+        },
+        "spi_vspi": {
+          "sck": 18,
+          "miso": 19,
+          "mosi": 23,
+          "ss": 5
+        }
+      },
+      "rails": {
+        "3v3": {
+          "source": "AMS1117 from VIN",
+          "recommended_max_ma": 300,
+          "absolute_max_ma": 500
+        },
+        "5v_vin": {
+          "source": "USB or barrel jack",
+          "recommended_max_ma": 500
+        },
+        "note": "WiFi TX bursts pull ~240 mA on 3V3. Budget for it before adding anything else."
+      },
+      "dims": {
+        "w_mm": 52.4,
+        "d_mm": 27.9,
+        "h_mm": 13.2,
+        "tolerance_mm": 0.5,
+        "shape_class": "rect",
+        "confidence": "datasheet"
+      }
+    }
+  ],
+  "parts": [
+    {
+      "id": "hc-sr04",
+      "name": "HC-SR04 ultrasonic distance",
+      "category": "sensor",
+      "source_url": "TODO: tokopedia + amazon listing (the exact SKU you will sell)",
+      "price_idr_min": 9000,
+      "price_idr_max": 25000,
+      "price_date": "2026-10-25",
+      "logic_v": 5.0,
+      "supply_v_min": 5.0,
+      "supply_v_max": 5.5,
+      "current_idle_ma": 2,
+      "current_peak_ma": 15,
+      "iface": {
+        "type": "digital",
+        "pins": [
+          "VCC",
+          "TRIG",
+          "ECHO",
+          "GND"
+        ],
+        "i2c_addr_default": null,
+        "i2c_addr_options": []
+      },
+      "needs_level_shift": true,
+      "needs_external_supply": false,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 45.0,
+        "d_mm": 20.0,
+        "h_mm": 15.0,
+        "shape_class": "rect",
+        "tolerance_mm": 1.0,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "4 x dia 2.5 mm, pattern approx 43.5 x 18.5 mm - MEASURE"
+      },
+      "keepouts": [
+        {
+          "side": "front",
+          "w_mm": 14.0,
+          "d_mm": 20.0
+        }
+      ],
+      "notes": "ECHO idles at 5 V -> level shifter or divider REQUIRED (rule R10). Transducer face must stay clear of enclosure wall.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "dht22",
+      "name": "DHT22 temperature/humidity",
+      "category": "sensor",
+      "source_url": "TODO",
+      "price_idr_min": 25000,
+      "price_idr_max": 60000,
+      "price_date": "2026-10-25",
+      "logic_v": 3.3,
+      "supply_v_min": 3.3,
+      "supply_v_max": 6.0,
+      "current_idle_ma": 0.3,
+      "current_peak_ma": 2.5,
+      "iface": {
+        "type": "digital",
+        "pins": [
+          "VCC",
+          "DATA",
+          "NC",
+          "GND"
+        ],
+        "i2c_addr_default": null,
+        "i2c_addr_options": []
+      },
+      "needs_level_shift": false,
+      "needs_external_supply": false,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 25.4,
+        "d_mm": 27.7,
+        "h_mm": 15.2,
+        "shape_class": "rect",
+        "tolerance_mm": 0.5,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "bare sensor has NO holes - needs a clip or clamp; breakout version differs"
+      },
+      "keepouts": [
+        {
+          "side": "front",
+          "w_mm": 25.4,
+          "d_mm": 15.0
+        }
+      ],
+      "notes": "Add 4.7k-10k pull-up on DATA. Slower sampling (min 2 s). Vented case must stay open to air.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "ssd1306-096",
+      "name": "0.96in SSD1306 OLED, I2C, 128x64",
+      "category": "display",
+      "source_url": "TODO",
+      "price_idr_min": 12000,
+      "price_idr_max": 35000,
+      "price_date": "2026-10-25",
+      "logic_v": 3.3,
+      "supply_v_min": 3.0,
+      "supply_v_max": 5.5,
+      "current_idle_ma": 10,
+      "current_peak_ma": 20,
+      "iface": {
+        "type": "i2c",
+        "pins": [
+          "GND",
+          "VCC",
+          "SCL",
+          "SDA"
+        ],
+        "i2c_addr_default": "0x3C",
+        "i2c_addr_options": [
+          "0x3D"
+        ]
+      },
+      "needs_level_shift": false,
+      "needs_external_supply": false,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 27.3,
+        "d_mm": 27.8,
+        "h_mm": 4.1,
+        "shape_class": "rect",
+        "tolerance_mm": 0.5,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "4 x dia 2.0 mm, pattern approx 23.5 x 23.5 mm - MEASURE"
+      },
+      "keepouts": [
+        {
+          "side": "top",
+          "w_mm": 27.3,
+          "d_mm": 27.8
+        }
+      ],
+      "notes": "Address strap 0x3C/0x3D - the single most common collision in beginner builds (rule R8). Screen side is glass - keep glass clear of enclosure walls.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "sg90",
+      "name": "SG90 micro servo",
+      "category": "actuator",
+      "source_url": "TODO",
+      "price_idr_min": 15000,
+      "price_idr_max": 35000,
+      "price_date": "2026-10-25",
+      "logic_v": 5.0,
+      "supply_v_min": 4.8,
+      "supply_v_max": 6.0,
+      "current_idle_ma": 10,
+      "current_peak_ma": 250,
+      "iface": {
+        "type": "pwm",
+        "pins": [
+          "GND",
+          "VCC",
+          "SIG"
+        ],
+        "i2c_addr_default": null,
+        "i2c_addr_options": []
+      },
+      "needs_level_shift": false,
+      "needs_external_supply": true,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 40.7,
+        "d_mm": 12.2,
+        "h_mm": 35.5,
+        "shape_class": "rect",
+        "tolerance_mm": 1.0,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "2 ears, dia 4.2-4.8 mm, spacing approx 28 x 10 mm - MEASURE"
+      },
+      "keepouts": [
+        {
+          "side": "top",
+          "w_mm": 40.7,
+          "d_mm": 35.5
+        }
+      ],
+      "notes": "Stall ~250 mA. MUST NOT be powered from the 3V3 rail (rules R11/R12). Signal from ESP32 3.3 V is accepted by most servos.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "mg996r",
+      "name": "MG996R metal gear servo",
+      "category": "actuator",
+      "source_url": "TODO",
+      "price_idr_min": 35000,
+      "price_idr_max": 80000,
+      "price_date": "2026-10-25",
+      "logic_v": 5.0,
+      "supply_v_min": 4.8,
+      "supply_v_max": 7.4,
+      "current_idle_ma": 20,
+      "current_peak_ma": 1200,
+      "iface": {
+        "type": "pwm",
+        "pins": [
+          "GND",
+          "VCC",
+          "SIG"
+        ],
+        "i2c_addr_default": null,
+        "i2c_addr_options": []
+      },
+      "needs_level_shift": false,
+      "needs_external_supply": true,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 40.7,
+        "d_mm": 19.7,
+        "h_mm": 42.9,
+        "shape_class": "rect",
+        "tolerance_mm": 1.0,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "2 ears, dia 4.8 mm, spacing approx 28 x 10 mm - MEASURE"
+      },
+      "keepouts": [
+        {
+          "side": "top",
+          "w_mm": 40.7,
+          "d_mm": 42.9
+        }
+      ],
+      "notes": "Stall up to 1.2 A. Requires its own 5-6 V supply and a common ground, or the ESP32 browns out.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "pca9685",
+      "name": "PCA9685 16-channel PWM driver",
+      "category": "driver",
+      "source_url": "TODO",
+      "price_idr_min": 18000,
+      "price_idr_max": 45000,
+      "price_date": "2026-10-25",
+      "logic_v": 3.3,
+      "supply_v_min": 2.3,
+      "supply_v_max": 5.5,
+      "current_idle_ma": 1,
+      "current_peak_ma": 100,
+      "iface": {
+        "type": "i2c",
+        "pins": [
+          "GND",
+          "VCC",
+          "SDA",
+          "SCL"
+        ],
+        "i2c_addr_default": "0x40",
+        "i2c_addr_options": [
+          "0x40",
+          "0x41",
+          "0x42",
+          "0x43",
+          "0x44",
+          "0x45",
+          "0x46",
+          "0x47"
+        ]
+      },
+      "needs_level_shift": false,
+      "needs_external_supply": false,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 68.6,
+        "d_mm": 21.6,
+        "h_mm": 5.0,
+        "shape_class": "rect",
+        "tolerance_mm": 1.0,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "4 x dia 3.0 mm at the corners - MEASURE"
+      },
+      "keepouts": [],
+      "notes": "The clean fix for 'too many servos': one I2C address, 16 PWM channels. Motor supply is separate from logic.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "tca9548a",
+      "name": "TCA9548A 8-channel I2C mux",
+      "category": "adapter",
+      "source_url": "TODO",
+      "price_idr_min": 12000,
+      "price_idr_max": 30000,
+      "price_date": "2026-10-25",
+      "logic_v": 3.3,
+      "supply_v_min": 1.8,
+      "supply_v_max": 5.5,
+      "current_idle_ma": 0.1,
+      "current_peak_ma": 100,
+      "iface": {
+        "type": "i2c",
+        "pins": [
+          "GND",
+          "VCC",
+          "SCL",
+          "SDA",
+          "SD0-SD7",
+          "A0-A2"
+        ],
+        "i2c_addr_default": "0x70",
+        "i2c_addr_options": [
+          "0x70",
+          "0x71",
+          "0x72",
+          "0x73",
+          "0x74",
+          "0x75",
+          "0x76",
+          "0x77"
+        ]
+      },
+      "needs_level_shift": false,
+      "needs_external_supply": false,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 19.0,
+        "d_mm": 18.0,
+        "h_mm": 3.0,
+        "shape_class": "rect",
+        "tolerance_mm": 0.5,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "4 x dia 2.0 mm - MEASURE"
+      },
+      "keepouts": [],
+      "notes": "The canonical auto-fix for an I2C address collision: put the colliding devices on separate mux channels.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "bss138-4ch",
+      "name": "4-channel BSS138 level shifter",
+      "category": "adapter",
+      "source_url": "TODO",
+      "price_idr_min": 8000,
+      "price_idr_max": 20000,
+      "price_date": "2026-10-25",
+      "logic_v": 3.3,
+      "supply_v_min": 3.0,
+      "supply_v_max": 5.5,
+      "current_idle_ma": 1,
+      "current_peak_ma": 100,
+      "iface": {
+        "type": "digital",
+        "pins": [
+          "LV",
+          "GND",
+          "HV",
+          "IN0-3",
+          "OUT0-3"
+        ],
+        "i2c_addr_default": null,
+        "i2c_addr_options": []
+      },
+      "needs_level_shift": false,
+      "needs_external_supply": false,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 22.0,
+        "d_mm": 17.0,
+        "h_mm": 2.5,
+        "shape_class": "rect",
+        "tolerance_mm": 0.5,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "4 x dia 2.0 mm - MEASURE"
+      },
+      "keepouts": [],
+      "notes": "Bidirectional, ~100 kHz typical - fine for slow sensors like HC-SR04, marginal for fast buses.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "bh1750",
+      "name": "BH1750 ambient light",
+      "category": "sensor",
+      "source_url": "TODO",
+      "price_idr_min": 10000,
+      "price_idr_max": 25000,
+      "price_date": "2026-10-25",
+      "logic_v": 3.3,
+      "supply_v_min": 3.0,
+      "supply_v_max": 5.5,
+      "current_idle_ma": 0.2,
+      "current_peak_ma": 1.5,
+      "iface": {
+        "type": "i2c",
+        "pins": [
+          "GND",
+          "VCC",
+          "SCL",
+          "SDA",
+          "ADDR"
+        ],
+        "i2c_addr_default": "0x23",
+        "i2c_addr_options": [
+          "0x23",
+          "0x24"
+        ]
+      },
+      "needs_level_shift": false,
+      "needs_external_supply": false,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 19.0,
+        "d_mm": 16.0,
+        "h_mm": 3.0,
+        "shape_class": "rect",
+        "tolerance_mm": 0.5,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "4 x dia 2.0 mm - MEASURE"
+      },
+      "keepouts": [
+        {
+          "side": "top",
+          "w_mm": 19.0,
+          "d_mm": 16.0
+        }
+      ],
+      "notes": "Needs a clear line of sight - keep the light sensor at the enclosure edge, not under the plate.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "mpu6050",
+      "name": "GY-521 MPU6050 IMU",
+      "category": "sensor",
+      "source_url": "TODO",
+      "price_idr_min": 12000,
+      "price_idr_max": 30000,
+      "price_date": "2026-10-25",
+      "logic_v": 3.3,
+      "supply_v_min": 3.0,
+      "supply_v_max": 5.5,
+      "current_idle_ma": 3,
+      "current_peak_ma": 5,
+      "iface": {
+        "type": "i2c",
+        "pins": [
+          "VCC",
+          "GND",
+          "SCL",
+          "SDA",
+          "XDA",
+          "XCL",
+          "AD0"
+        ],
+        "i2c_addr_default": "0x68",
+        "i2c_addr_options": [
+          "0x68",
+          "0x69"
+        ]
+      },
+      "needs_level_shift": false,
+      "needs_external_supply": false,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 21.0,
+        "d_mm": 16.0,
+        "h_mm": 3.5,
+        "shape_class": "rect",
+        "tolerance_mm": 0.5,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "4 x dia 2.2 mm, pattern approx 15.2 x 10.2 mm - MEASURE"
+      },
+      "keepouts": [],
+      "notes": "Very common companion to an OLED (0x3C) - two I2C devices, one bus.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "bme280",
+      "name": "BME280 temperature/humidity/pressure",
+      "category": "sensor",
+      "source_url": "TODO",
+      "price_idr_min": 15000,
+      "price_idr_max": 40000,
+      "price_date": "2026-10-25",
+      "logic_v": 3.3,
+      "supply_v_min": 1.71,
+      "supply_v_max": 3.6,
+      "current_idle_ma": 0.1,
+      "current_peak_ma": 1.2,
+      "iface": {
+        "type": "i2c",
+        "pins": [
+          "GND",
+          "VCC",
+          "SCL",
+          "SDA",
+          "SDO",
+          "CSB"
+        ],
+        "i2c_addr_default": "0x76",
+        "i2c_addr_options": [
+          "0x76",
+          "0x77"
+        ]
+      },
+      "needs_level_shift": false,
+      "needs_external_supply": false,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 21.0,
+        "d_mm": 16.0,
+        "h_mm": 3.0,
+        "shape_class": "rect",
+        "tolerance_mm": 0.5,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "4 x dia 2.0 mm - MEASURE"
+      },
+      "keepouts": [],
+      "notes": "Do NOT power from 5 V - max supply is 3.6 V. A 5 V breadboard rail will kill it.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "ds18b20",
+      "name": "DS18B20 waterproof probe",
+      "category": "sensor",
+      "source_url": "TODO",
+      "price_idr_min": 15000,
+      "price_idr_max": 35000,
+      "price_date": "2026-10-25",
+      "logic_v": 3.3,
+      "supply_v_min": 3.0,
+      "supply_v_max": 5.5,
+      "current_idle_ma": 0.5,
+      "current_peak_ma": 1.5,
+      "iface": {
+        "type": "onewire",
+        "pins": [
+          "VCC",
+          "DQ",
+          "GND"
+        ],
+        "i2c_addr_default": null,
+        "i2c_addr_options": []
+      },
+      "needs_level_shift": false,
+      "needs_external_supply": false,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 6.0,
+        "d_mm": 6.0,
+        "h_mm": 60.0,
+        "shape_class": "cyl",
+        "tolerance_mm": 0.5,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "probe body is 6 mm dia, 60 mm long; cable exit must be a hole in the enclosure"
+      },
+      "keepouts": [
+        {
+          "side": "rear",
+          "w_mm": 6.0,
+          "d_mm": 6.0
+        }
+      ],
+      "notes": "Needs 4.7k pull-up on DQ. The 6 mm cylinder is the only non-rectangular part in the common kit - good test of the fit-checker.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "soil-capacitive",
+      "name": "Capacitive soil moisture (analog)",
+      "category": "sensor",
+      "source_url": "TODO",
+      "price_idr_min": 10000,
+      "price_idr_max": 25000,
+      "price_date": "2026-10-25",
+      "logic_v": 3.3,
+      "supply_v_min": 3.3,
+      "supply_v_max": 5.5,
+      "current_idle_ma": 5,
+      "current_peak_ma": 20,
+      "iface": {
+        "type": "analog",
+        "pins": [
+          "VCC",
+          "GND",
+          "AOUT"
+        ],
+        "i2c_addr_default": null,
+        "i2c_addr_options": []
+      },
+      "needs_level_shift": false,
+      "needs_external_supply": false,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 60.0,
+        "d_mm": 25.0,
+        "h_mm": 12.0,
+        "shape_class": "rect",
+        "tolerance_mm": 1.0,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "2 x dia 2.5 mm at the prongs end - MEASURE"
+      },
+      "keepouts": [
+        {
+          "side": "front",
+          "w_mm": 25.0,
+          "d_mm": 12.0
+        }
+      ],
+      "notes": "AOUT swings 0-3 V but some clones output up to 3.3 V on 5 V supply - verify with a meter before trusting ADC range.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "relay-4ch",
+      "name": "4-channel relay module (low level trigger)",
+      "category": "actuator",
+      "source_url": "TODO",
+      "price_idr_min": 12000,
+      "price_idr_max": 30000,
+      "price_date": "2026-10-25",
+      "logic_v": 5.0,
+      "supply_v_min": 5.0,
+      "supply_v_max": 5.5,
+      "current_idle_ma": 70,
+      "current_peak_ma": 80,
+      "iface": {
+        "type": "digital",
+        "pins": [
+          "VCC",
+          "GND",
+          "IN1-IN4"
+        ],
+        "i2c_addr_default": null,
+        "i2c_addr_options": []
+      },
+      "needs_level_shift": true,
+      "needs_external_supply": false,
+      "needs_flyback": true,
+      "dims": {
+        "w_mm": 50.0,
+        "d_mm": 26.0,
+        "h_mm": 19.0,
+        "shape_class": "rect",
+        "tolerance_mm": 1.0,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "2 x dia 3.2 mm - MEASURE"
+      },
+      "keepouts": [
+        {
+          "side": "top",
+          "w_mm": 20.0,
+          "d_mm": 26.0
+        }
+      ],
+      "notes": "Coil is inductive: flyback diode required. IN is 5 V logic -> level shift or 3.3 V-compatible trigger variant.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "ws2812b-strip",
+      "name": "WS2812B LED strip (60/m)",
+      "category": "actuator",
+      "source_url": "TODO",
+      "price_idr_min": 15000,
+      "price_idr_max": 40000,
+      "price_date": "2026-10-25",
+      "logic_v": 5.0,
+      "supply_v_min": 4.5,
+      "supply_v_max": 5.5,
+      "current_idle_ma": 1,
+      "current_peak_ma": 60,
+      "iface": {
+        "type": "digital",
+        "pins": [
+          "5V",
+          "DIN",
+          "GND"
+        ],
+        "i2c_addr_default": null,
+        "i2c_addr_options": []
+      },
+      "needs_level_shift": false,
+      "needs_external_supply": true,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 10.0,
+        "d_mm": 100.0,
+        "h_mm": 2.5,
+        "shape_class": "rect",
+        "tolerance_mm": 0.5,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "adhesive strip - no holes; add 3 M3 clamp holes in the adapter"
+      },
+      "keepouts": [],
+      "notes": "DIN is 5 V logic -> level shifter. 60 mA per LED at full white; 60 LEDs = 3.6 A. Never from the 3V3 rail.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "uln2003-28byj",
+      "name": "28BYJ-48 stepper + ULN2003 driver",
+      "category": "driver",
+      "source_url": "TODO",
+      "price_idr_min": 20000,
+      "price_idr_max": 45000,
+      "price_date": "2026-10-25",
+      "logic_v": 5.0,
+      "supply_v_min": 5.0,
+      "supply_v_max": 12.0,
+      "current_idle_ma": 100,
+      "current_peak_ma": 200,
+      "iface": {
+        "type": "digital",
+        "pins": [
+          "IN1-IN4",
+          "+",
+          "-"
+        ],
+        "i2c_addr_default": null,
+        "i2c_addr_options": []
+      },
+      "needs_level_shift": true,
+      "needs_external_supply": true,
+      "needs_flyback": true,
+      "dims": {
+        "w_mm": 43.0,
+        "d_mm": 43.0,
+        "h_mm": 26.0,
+        "shape_class": "rect",
+        "tolerance_mm": 1.0,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "4 x dia 3.2 mm at corners - MEASURE"
+      },
+      "keepouts": [],
+      "notes": "Motor coils are inductive -> flyback diodes are ON the driver board. Stepper is 28 mm dia x 19 mm body, needs a shaft coupler.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "piezo-buzzer",
+      "name": "Piezo buzzer, active",
+      "category": "actuator",
+      "source_url": "TODO",
+      "price_idr_min": 3000,
+      "price_idr_max": 10000,
+      "price_date": "2026-10-25",
+      "logic_v": 3.3,
+      "supply_v_min": 3.0,
+      "supply_v_max": 5.5,
+      "current_idle_ma": 10,
+      "current_peak_ma": 30,
+      "iface": {
+        "type": "digital",
+        "pins": [
+          "+",
+          "-"
+        ],
+        "i2c_addr_default": null,
+        "i2c_addr_options": []
+      },
+      "needs_level_shift": false,
+      "needs_external_supply": false,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 12.0,
+        "d_mm": 12.0,
+        "h_mm": 9.0,
+        "shape_class": "cyl",
+        "tolerance_mm": 0.5,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "no holes - needs a press fit or a hole in the plate"
+      },
+      "keepouts": [
+        {
+          "side": "top",
+          "w_mm": 12.0,
+          "d_mm": 12.0
+        }
+      ],
+      "notes": "Needs a hole in the plate for sound. 30 mA is fine on 3V3 but a piezo can be driven from a GPIO directly.",
+      "confidence": "clone-typical"
+    },
+    {
+      "id": "mq2",
+      "name": "MQ-2 gas/smoke sensor (LPG, methane, smoke)",
+      "category": "sensor",
+      "source_url": "TODO: tokopedia listing for the exact SKU",
+      "price_idr_min": 18000,
+      "price_idr_max": 45000,
+      "price_date": "2026-10-25",
+      "logic_v": 5.0,
+      "supply_v_min": 4.5,
+      "supply_v_max": 5.5,
+      "current_idle_ma": 20,
+      "current_peak_ma": 150,
+      "iface": {
+        "type": "analog",
+        "pins": [
+          "VCC",
+          "GND",
+          "AOUT"
+        ],
+        "i2c_addr_default": null,
+        "i2c_addr_options": []
+      },
+      "needs_level_shift": true,
+      "needs_external_supply": false,
+      "needs_flyback": false,
+      "dims": {
+        "w_mm": 32.0,
+        "d_mm": 22.0,
+        "h_mm": 22.0,
+        "shape_class": "rect",
+        "tolerance_mm": 1.0,
+        "confidence": "clone-typical"
+      },
+      "mount": {
+        "holes": [],
+        "standoff_mm": 0,
+        "header_pitch_mm": 2.54,
+        "hole_note": "3 pins on 2.54 mm pitch; the sensor pot protrudes above the PCB"
+      },
+      "keepouts": [
+        {
+          "side": "top",
+          "w_mm": 12.0,
+          "d_mm": 12.0
+        }
+      ],
+      "notes": "5 V heater ~150 mA. AOUT is uncalibrated: report a ratio to a fresh-air baseline, never ppm. The AOUT range depends on the divider values on the clone - MEASURE the output with a meter before trusting the ADC.",
+      "confidence": "clone-typical"
+    }
+  ],
+  "consumables": [
+    {
+      "id": "m3-nut",
+      "name": "M3 heat-set nut / screw kit",
+      "price_idr_min": 8000,
+      "price_idr_max": 20000,
+      "notes": "M3 x 8-12 mm; heat-set nuts give a printable plate",
+      "price_date": "2026-10-25"
+    },
+    {
+      "id": "standoff-m2-m3",
+      "name": "M2/M3 standoffs 10/15/20/25 mm",
+      "price_idr_min": 8000,
+      "price_idr_max": 25000,
+      "notes": "the 10/25 mm combo covers most sensor boards",
+      "price_date": "2026-10-25"
+    },
+    {
+      "id": "perf-plate",
+      "name": "M3 perforated plate 200x200 mm, 10 mm grid",
+      "price_idr_min": 25000,
+      "price_idr_max": 60000,
+      "notes": "the grid invariant that makes CAD trivial",
+      "price_date": "2026-10-25"
+    },
+    {
+      "id": "jumper-set",
+      "name": "Dupont jumper wires (M-M, M-F, F-F)",
+      "price_idr_min": 10000,
+      "price_idr_max": 25000,
+      "notes": "shorter is better for a build that has to fit an enclosure",
+      "price_date": "2026-10-25"
+    },
+    {
+      "id": "breadboard-830",
+      "name": "830-point breadboard",
+      "price_idr_min": 15000,
+      "price_idr_max": 35000,
+      "notes": "the fastest path to a first working build",
+      "price_date": "2026-10-25"
+    }
+  ],
+  "db_version": "0.3"
+}

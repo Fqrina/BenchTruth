@@ -1,0 +1,144 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project Spec (LLM output)",
+  "description": "The ONLY thing the model is allowed to produce. It states intent; it never names pins, writes code, or writes geometry.",
+  "type": "object",
+  "required": ["board", "goal", "peripherals", "constraints"],
+  "additionalProperties": false,
+  "properties": {
+    "board": {
+      "type": "string",
+      "description": "Board id from parts_db.json.boards[].id",
+      "examples": ["esp32-devkitc-v4"]
+    },
+    "goal": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 300,
+      "description": "What the device should DO, in observable behaviour."
+    },
+    "peripherals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["part_id", "role"],
+        "additionalProperties": false,
+        "properties": {
+          "part_id": {
+            "type": "string",
+            "description": "Exact id from parts_db.json. If the part is not in the DB, use 'UNKNOWN:<name>' so the solver refuses instead of guessing.",
+            "examples": ["ssd1306-096", "UNKNOWN:ina219"]
+          },
+          "role": { "type": "string", "maxLength": 200 },
+          "count": { "type": "integer", "minimum": 1, "default": 1 },
+          "power": {
+            "type": "string",
+            "enum": ["3v3", "5v", "external", "auto"],
+            "description": "Only if the user stated how it is powered."
+          },
+          "address_preference": {
+            "type": "string",
+            "pattern": "^0x[0-9A-Fa-f]{2}$"
+          },
+          "signals_needed": {
+            "type": "array",
+            "description": "What the MCU must provide. NEVER a pin number.",
+            "items": {
+              "type": "object",
+              "required": ["signal", "direction"],
+              "additionalProperties": false,
+              "properties": {
+                "signal": {
+                  "type": "string",
+                  "enum": ["digital_out", "digital_in", "pwm_out", "analog_in", "i2c", "spi", "uart", "onewire"]
+                },
+                "direction": { "type": "string", "enum": ["in", "out", "bidirectional"] },
+                "note": { "type": "string", "maxLength": 200 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "requested_pins": {
+      "type": "array",
+      "description": "Only when the user names a specific pin. The solver honours the request and then the rules judge it.",
+      "items": {
+        "type": "object",
+        "required": ["part_id", "signal", "gpio"],
+        "additionalProperties": false,
+        "properties": {
+          "part_id": { "type": "string" },
+          "signal": { "type": "string" },
+          "gpio": { "type": "integer", "minimum": 0, "maximum": 39 }
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "power": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "battery": { "type": "boolean" },
+            "external_supply_allowed": { "type": "boolean", "default": true },
+            "max_total_ma": { "type": "integer", "minimum": 0 },
+            "target_runtime_hours": { "type": "number", "minimum": 0 }
+          }
+        },
+        "connectivity": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["wifi", "ble", "mqtt", "http", "none"] },
+          "uniqueItems": true
+        },
+        "i2c_pullup_mode": {
+          "type": "string",
+          "enum": ["auto", "external", "internal"],
+          "default": "auto",
+          "description": "'internal' means the ESP32's own pull-ups -- which are ~45 kOhm and not good enough for I2C."
+        },
+        "mechanical": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mount_style": {
+              "type": "string",
+              "enum": ["free", "breadboard", "grid_plate", "enclosure"],
+              "default": "free"
+            },
+            "grid_pitch_mm": { "type": "number", "enum": [5, 10, 15, 20, 25], "default": 10 },
+            "max_envelope_mm": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "w": { "type": "number" },
+                "d": { "type": "number" },
+                "h": { "type": "number" }
+              }
+            },
+            "weatherproof": { "type": "boolean", "default": false }
+          }
+        },
+        "budget_idr": { "type": "integer", "minimum": 0 },
+        "assembly_level": {
+          "type": "string",
+          "enum": ["beginner", "intermediate", "advanced"],
+          "default": "beginner"
+        }
+      }
+    },
+    "learning": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "goal": { "type": "string", "maxLength": 300 },
+        "level": { "type": "string", "enum": ["beginner", "intermediate", "advanced"] },
+        "topics_wanted": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "notes": { "type": "string", "maxLength": 500 }
+  }
+}

@@ -1,0 +1,36 @@
+# secrets -- never commit these
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+credentials.json
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# build / artifacts
+build/
+dist/
+*.stl
+*.gcode
+*.elf
+*.hex
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# local scratch
+out/
+tmp/
+*.log
